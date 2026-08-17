@@ -1,0 +1,61 @@
+name: Sync upstream (Gadgetbridge / Codeberg)
+
+on:
+  schedule:
+    - cron: '0 6 * * 1' # weekly, Monday 06:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch upstream
+        run: |
+          git remote add upstream https://codeberg.org/Freeyourgadget/Gadgetbridge.git
+          git fetch upstream master
+
+      - name: Check for new upstream commits
+        id: check
+        run: |
+          upstream_sha=$(git rev-parse upstream/master)
+          current_sha=$(git ls-remote origin refs/heads/codeberg-sync | cut -f1)
+          echo "upstream_sha=$upstream_sha" >> "$GITHUB_OUTPUT"
+          if [ "$upstream_sha" = "$current_sha" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Push codeberg-sync branch
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          git branch -f codeberg-sync upstream/master
+          git push origin codeberg-sync --force
+
+      - name: Open or refresh sync PR
+        if: steps.check.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -z "$(gh pr list --head codeberg-sync --state open --json number --jq '.[0].number')" ]; then
+            gh pr create \
+              --title "Sync from Gadgetbridge upstream (Codeberg)" \
+              --base main \
+              --head codeberg-sync \
+              --body "Automated weekly sync from https://codeberg.org/Freeyourgadget/Gadgetbridge (\`master\`).
+
+This PR is for review only — it is **not** meant to be merged directly, since Pulse's UI reskin will conflict with most upstream changes. Use it to spot upstream fixes (device support, bug fixes) worth cherry-picking into \`main\`.
+
+The \`codeberg-sync\` branch is force-pushed on every run, so don't push manual commits to it."
+          else
+            echo "Sync PR already open; branch updated to $(git rev-parse --short upstream/master)."
+          fi
