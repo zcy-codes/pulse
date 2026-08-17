@@ -53,9 +53,9 @@ jobs:
               --head codeberg-sync \
               --body "Automated weekly sync from https://codeberg.org/Freeyourgadget/Gadgetbridge (\`master\`).
 
-This PR is for review only — it is **not** meant to be merged directly, since Pulse's UI reskin will conflict with most upstream changes. Use it to spot upstream fixes (device support, bug fixes) worth cherry-picking into \`main\`.
+              This PR is for review only — it is **not** meant to be merged directly, since Pulse's UI reskin will conflict with most upstream changes. Use it to spot upstream fixes (device support, bug fixes) worth cherry-picking into \`main\`.
 
-The \`codeberg-sync\` branch is force-pushed on every run, so don't push manual commits to it."
+              The \`codeberg-sync\` branch is force-pushed on every run, so don't push manual commits to it."
           else
             echo "Sync PR already open; branch updated to $(git rev-parse --short upstream/master)."
           fi
