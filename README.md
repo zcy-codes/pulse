@@ -1,10 +1,13 @@
+> [!IMPORTANT]
+> This is not the official gadgetbridge, if you are looking to install gadgetbridge, do so here [install](https://gadgetbridge.org)  
+
 <div align="center">
 
 # Pulse
 
-**A Garmin-only wearable companion with a brand-new look.**
+**A Garmin-only wearable companion with a new ui.**
 
-*by [zoop](https://zachy.cc) · `cc.zachy.pulse`*
+*by [zach](https://zachy.cc) · `cc.zachy.pulse`*
 
 Neon-blue, near-black, fully on-device. No accounts, no vendor cloud, no telemetry.
 
