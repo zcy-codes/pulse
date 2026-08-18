@@ -1,5 +1,5 @@
 > [!IMPORTANT]
-> This is not the official gadgetbridge, if you are looking to install gadgetbridge, do so here [install](https://gadgetbridge.org)  
+> This is not the official gadgetbridge, if you are looking to install gadgetbridge, do so [here](https://gadgetbridge.org)  
 
 <div align="center">
 
