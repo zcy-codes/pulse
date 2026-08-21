@@ -5,11 +5,11 @@
 
 # Pulse
 
-**A Garmin-only wearable companion with a new ui.**
+**A Garmin-only wearable companion with a modern ui.**
 
 *by [zach](https://zachy.cc) · `cc.zachy.pulse`*
 
-Neon-blue, near-black, fully on-device. No accounts, no vendor cloud, no telemetry.
+A fork of gadgetbridge redesigned to look more modern, with a primarily blue and black color scheme
 
 </div>
 
@@ -17,28 +17,28 @@ Neon-blue, near-black, fully on-device. No accounts, no vendor cloud, no telemet
 
 ## What is Pulse?
 
-Pulse is a focused fork of [Gadgetbridge](https://codeberg.org/Freeyourgadget/Gadgetbridge) that pairs with **Garmin** watches and reskins the whole experience around a single idea: your health data should look good and stay on your phone.
+Pulse is a focused fork of [Gadgetbridge](https://codeberg.org/Freeyourgadget/Gadgetbridge) that pairs with **Garmin** watches and reskins the whole app to have a simpler, more accented UI.
 
-Everything Gadgetbridge does to talk to your Garmin over Bluetooth is still here — Pulse just rebuilds the entire surface on top of it: a new home, new tabs, custom typography, light/dark theming, accent colours, and a pile of features that aren't in upstream.
+The base gadgetbridge is still here, its just been fully redesigned, I haven't added any new compatibility, and I don't plan on it, as that's not my expertise
 
 ## Highlights
 
-- **Today** — a big animated steps ring with a rounded nub, tinted hero tiles that fill with your progress, and a personalised greeting.
+- **Today** — an animated stats ring, customizable tiles that fill with your progress, and a personalised greeting.
 - **Goal celebration & streaks** — confetti and a notification when you hit a goal; tap the flame for a full streak calendar. Optional "any goal counts" streak mode.
-- **Health tab** — a customizable grid of metric cards (heart rate, body energy, stress, SpO₂, HRV, respiration…) each with a chunky 7-day mini chart.
+- **Health tab** — a customizable grid of metric cards (heart rate, body energy, stress, SpO₂, HRV, respiration…) each with a 7-day mini chart.
 - **Sleep tab** — a sleep score, last-night stage hypnogram, nap detection, and a 7-night trend.
-- **Fitness** — browse recorded workouts and in-depth, neon-styled charts.
-- **Week in Review** — an animated weekly recap with an adaptive challenge and a Sunday-evening summary.
+- **Fitness** — browse recorded workouts and, detailed charts.
+- **Week in Review** — an animated weekly review with a summary of your week
 - **Achievements** — unlockable badges you can share as cards.
 - **Home-screen widgets** — full + compact steps widgets with a refresh button, plus a Quick Settings tile.
 - **Make it yours** — Light / Dark / System, and accent colours (Neon Blue, Violet, Coral, Mint, Pink).
-- **Weather** — fetches local weather (Open-Meteo) and pushes it to your watch.
-
+- **Weather** — fetches local weather (Open-Meteo) and pushes it to your watch for supported models.
+(The internet permission currently isn't optional, even though the weather fetching is, this will be fixed in the next update)
 See [`app/src/main/res/xml/changelog_master.xml`](app/src/main/res/xml/changelog_master.xml) for the full, version-by-version history.
 
 ## Aesthetic
 
-Near-black UI, neon-blue accents, [Unbounded](https://fonts.google.com/specimen/Unbounded) + [Satoshi](https://www.fontshare.com/fonts/satoshi) type. Built to feel like [zachy.cc](https://zachy.cc).
+Near-black UI, neon-blue accents, [Unbounded](https://fonts.google.com/specimen/Unbounded) + [Satoshi](https://www.fontshare.com/fonts/satoshi) type.
 
 ## Building
 
