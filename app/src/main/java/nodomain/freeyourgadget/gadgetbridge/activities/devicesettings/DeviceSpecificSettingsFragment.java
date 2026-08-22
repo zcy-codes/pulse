@@ -52,6 +52,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
@@ -81,6 +82,12 @@ import nodomain.freeyourgadget.gadgetbridge.activities.ConfigureWorldClocks;
 import nodomain.freeyourgadget.gadgetbridge.activities.NotificationsAppIconUploadActivity;
 import nodomain.freeyourgadget.gadgetbridge.activities.app_specific_notifications.AppSpecificNotificationSettingsActivity;
 import nodomain.freeyourgadget.gadgetbridge.activities.audiorecordings.AudioRecordingsActivity;
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.DeviceSetting;
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.DeviceSettingRenderer;
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.DeviceSettingsRefreshHandle;
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.DeviceSettingsSpec;
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.ScreenSetting;
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.XmlScreenSetting;
 import nodomain.freeyourgadget.gadgetbridge.activities.internet.InternetFirewallActivity;
 import nodomain.freeyourgadget.gadgetbridge.activities.loyaltycards.LoyaltyCardsSettingsActivity;
 import nodomain.freeyourgadget.gadgetbridge.activities.loyaltycards.LoyaltyCardsSettingsConst;
@@ -111,6 +118,22 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
     private DeviceSpecificSettingsCustomizer deviceSpecificSettingsCustomizer;
 
     private GBDevice device;
+
+    /**
+     * Handle returned by {@link DeviceSettingRenderer} after rendering model-provided preferences.
+     * Run to re-evaluate conditional visibility; call {@link DeviceSettingsRefreshHandle#cleanup()}
+     * to unregister any SharedPreferences listeners registered for getOnSharedPreferenceChanged callbacks.
+     */
+    @Nullable
+    private DeviceSettingsRefreshHandle modelVisibilityRefresh;
+
+    /**
+     * Preference keys owned by the programmatic model renderer. {@link #addPreferenceHandlerFor}
+     * skips these so that {@link #setChangeListener} cannot overwrite the renderer-registered
+     * change listeners.
+     */
+    @Nullable
+    private java.util.Set<String> modelManagedKeys;
 
     private void setSettingsFileSuffix(String settingsFileSuffix) {
         Bundle args = new Bundle();
@@ -148,6 +171,9 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
                         deviceSpecificSettingsCustomizer.onDeviceChanged(DeviceSpecificSettingsFragment.this);
                     }
                     reloadEnabledPreferences();
+                    if (modelVisibilityRefresh != null) {
+                        modelVisibilityRefresh.run();
+                    }
                 }
             }
         }
@@ -169,6 +195,11 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
 
     @Override
     public void onDestroyView() {
+        if (modelVisibilityRefresh != null) {
+            // Using onDestroyView (rather than onStop) keeps the listeners alive across the onStop -> onStart
+            // cycle that occurs when the user backgrounds the app or navigates into a sub-screen and back.
+            modelVisibilityRefresh.cleanup();
+        }
         LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(mDeviceUpdateReceiver);
         super.onDestroyView();
     }
@@ -192,15 +223,96 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
 
         LOG.debug("onCreatePreferences: {}", rootKey);
 
+        final DeviceSettingsSpec modelSpec = device.getDeviceCoordinator().getDeviceSettings(device);
+
+        if (rootKey != null) {
+            // Check whether rootKey belongs to a model-defined ScreenSetting and, if so, render
+            // the screen programmatically, bypassing the XML inflation path entirely.
+            if (modelSpec != null) {
+                final ScreenSetting modelScreen = modelSpec.findScreen(rootKey);
+                if (modelScreen != null) {
+                    final PreferenceScreen prefScreen = getPreferenceManager().createPreferenceScreen(requireContext());
+                    prefScreen.setKey(rootKey);
+                    prefScreen.setTitle(modelScreen.getTitle());
+                    setPreferenceScreen(prefScreen);
+                    final Prefs prefs = new Prefs(getPreferenceManager().getSharedPreferences());
+                    modelVisibilityRefresh = DeviceSettingRenderer.INSTANCE.render(
+                            modelScreen.getChildren(),
+                            prefScreen,
+                            prefs,
+                            this
+                    );
+                    // A model ScreenSetting can share a key with a DeviceSpecificSettingsScreen
+                    // enum entry (e.g. CONNECTION) that also has legacy XML sub-screens registered
+                    // against it (e.g. the generic reconnect/connection-priority settings added
+                    // unconditionally for every coordinator) - append those after the model's own
+                    // children rather than losing them.
+                    final List<Integer> legacySubScreens = deviceSpecificSettings.getScreen(rootKey);
+                    if (legacySubScreens != null) {
+                        // addRootScreen() registers the enum's own folder placeholder XML (an
+                        // empty, title-only PreferenceScreen) as a "sub-screen" of itself - skip
+                        // it, only inline the actual additional content.
+                        int enumPlaceholderXml = 0;
+                        for (final DeviceSpecificSettingsScreen enumScreen : DeviceSpecificSettingsScreen.values()) {
+                            if (enumScreen.getKey().equals(rootKey)) {
+                                enumPlaceholderXml = enumScreen.getXml();
+                                break;
+                            }
+                        }
+                        for (final int subScreen : legacySubScreens) {
+                            if (subScreen != enumPlaceholderXml) {
+                                addPreferencesFromResource(subScreen);
+                            }
+                        }
+                    }
+                    reloadEnabledPreferences();
+                    return;
+                }
+            }
+        }
+
         if (rootKey == null) {
             // we are the main preference screen
-            boolean first = true;
-            for (int setting : deviceSpecificSettings.getRootScreens()) {
-                if (first) {
-                    setPreferencesFromResource(setting, null);
-                    first = false;
-                } else {
-                    addPreferencesFromResource(setting);
+            if (modelSpec != null) {
+                modelManagedKeys = modelSpec.collectAllKeys();
+                setPreferenceScreen(getPreferenceManager().createPreferenceScreen(requireContext()));
+                final Prefs prefs = new Prefs(getPreferenceManager().getSharedPreferences());
+                modelVisibilityRefresh = DeviceSettingRenderer.INSTANCE.render(
+                        modelSpec.getItems(),
+                        getPreferenceScreen(),
+                        prefs,
+                        this
+                );
+                // XmlScreenSetting nodes are inflated inline by the renderer; only add the
+                // remaining XML screens (CONNECTION, BATTERY, DEVELOPER, etc.) at the end.
+                final java.util.Set<Integer> modelXmlScreens = new java.util.HashSet<>();
+                for (final DeviceSetting item : modelSpec.getItems()) {
+                    if (item instanceof XmlScreenSetting) {
+                        modelXmlScreens.add(((XmlScreenSetting) item).getScreen().getXml());
+                    }
+                }
+                for (final int screen : deviceSpecificSettings.getRootScreens()) {
+                    if (modelXmlScreens.contains(screen)) {
+                        continue;
+                    }
+                    // A model ScreenSetting can claim the same key as a DeviceSpecificSettingsScreen
+                    // enum entry (e.g. CONNECTION, which is unconditionally added above) to provide
+                    // its root entry programmatically instead of via the enum's generic XML.
+                    final DeviceSpecificSettingsScreen enumScreen = DeviceSpecificSettingsScreen.fromXml(screen);
+                    if (enumScreen != null && modelSpec.findScreen(enumScreen.getKey()) != null) {
+                        continue;
+                    }
+                    addPreferencesFromResource(screen);
+                }
+            } else {
+                boolean first = true;
+                for (int setting : deviceSpecificSettings.getRootScreens()) {
+                    if (first) {
+                        setPreferencesFromResource(setting, null);
+                        first = false;
+                    } else {
+                        addPreferencesFromResource(setting);
+                    }
                 }
             }
         } else {
@@ -239,6 +351,13 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
         for (final DeviceSpecificSettingsScreen value : DeviceSpecificSettingsScreen.values()) {
             final PreferenceScreen prefScreen = findPreference(value.getKey());
             if (prefScreen != null) {
+                if (modelSpec != null && modelSpec.findScreen(value.getKey()) != null) {
+                    // This screen is a model ScreenSetting rendered in-memory by
+                    // DeviceSettingRenderer; it already navigates via the default nested
+                    // PreferenceScreen click handling, so wiring this listener too would push a
+                    // second, redundant navigation onto the back stack.
+                    continue;
+                }
                 prefScreen.setOnPreferenceClickListener(p -> {
                     onNavigateToScreen(prefScreen);
                     return true;
@@ -750,6 +869,9 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
         addPreferenceHandlerFor(PREF_HUAWEI_FREEBUDS_ANC_MODE);
         addPreferenceHandlerFor(PREF_HUAWEI_FREEBUDS_VOICE_BOOST);
         addPreferenceHandlerFor(PREF_HUAWEI_FREEBUDS_BETTER_AUDIO_QUALITY);
+        addPreferenceHandlerFor(PREF_HUAWEI_FREEBUDS_ADAPTIVE_VOLUME);
+        addPreferenceHandlerFor(PREF_HUAWEI_FREEBUDS_EXTRA_MEDIA_VOLUME);
+        addPreferenceHandlerFor(PREF_HUAWEI_FREEBUDS_FIND_HEADPHONES);
 
 
         addPreferenceHandlerFor(PREF_GALAXY_BUDS_AMBIENT_VOICE_FOCUS);
@@ -841,47 +963,14 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
         addPreferenceHandlerFor(PREF_REDMI_BUDS_8_ACTIVE_CONTROL_LONG_TAP_MODE_RIGHT);
         addPreferenceHandlerFor(PREF_REDMI_BUDS_8_ACTIVE_EQUALIZER_PRESET);
 
-        addPreferenceHandlerFor(PREF_SONY_AMBIENT_SOUND_CONTROL);
         addPreferenceHandlerFor(PREF_SONY_AMBIENT_SOUND_CONTROL_BUTTON_MODE);
-        addPreferenceHandlerFor(PREF_SONY_FOCUS_VOICE);
         addPreferenceHandlerFor(PREF_SONY_AMBIENT_SOUND_LEVEL);
-        addPreferenceHandlerFor(PREF_SONY_SOUND_POSITION);
-        addPreferenceHandlerFor(PREF_SONY_SURROUND_MODE);
-        addPreferenceHandlerFor(PREF_SONY_EQUALIZER_MODE);
-        addPreferenceHandlerFor(PREF_SONY_EQUALIZER_BAND_400);
-        addPreferenceHandlerFor(PREF_SONY_EQUALIZER_BAND_1000);
-        addPreferenceHandlerFor(PREF_SONY_EQUALIZER_BAND_2500);
-        addPreferenceHandlerFor(PREF_SONY_EQUALIZER_BAND_6300);
-        addPreferenceHandlerFor(PREF_SONY_EQUALIZER_BAND_16000);
-        addPreferenceHandlerFor(PREF_SONY_EQUALIZER_BASS);
-        addPreferenceHandlerFor(PREF_SONY_AUDIO_HD);
-        addPreferenceHandlerFor(PREF_SONY_BUTTON_FUNCTION_NC_AMBIENT);
-        addPreferenceHandlerFor(PREF_SONY_AUDIO_UPSAMPLING);
-        addPreferenceHandlerFor(PREF_SONY_TOUCH_SENSOR);
-        addPreferenceHandlerFor(PREF_SONY_PAUSE_WHEN_TAKEN_OFF);
-        addPreferenceHandlerFor(PREF_SONY_BUTTON_MODE_LEFT);
-        addPreferenceHandlerFor(PREF_SONY_BUTTON_MODE_RIGHT);
-        addPreferenceHandlerFor(PREF_SONY_QUICK_ACCESS_DOUBLE_TAP);
-        addPreferenceHandlerFor(PREF_SONY_QUICK_ACCESS_TRIPLE_TAP);
-        addPreferenceHandlerFor(PREF_SONY_AUTOMATIC_POWER_OFF);
-        addPreferenceHandlerFor(PREF_SONY_NOTIFICATION_VOICE_GUIDE);
-        addPreferenceHandlerFor(PREF_SONY_SPEAK_TO_CHAT);
-        addPreferenceHandlerFor(PREF_SONY_SPEAK_TO_CHAT_SENSITIVITY);
-        addPreferenceHandlerFor(PREF_SONY_SPEAK_TO_CHAT_FOCUS_ON_VOICE);
-        addPreferenceHandlerFor(PREF_SONY_SPEAK_TO_CHAT_TIMEOUT);
-        addPreferenceHandlerFor(PREF_SONY_CONNECT_TWO_DEVICES);
-        addPreferenceHandlerFor(PREF_SONY_ADAPTIVE_VOLUME_CONTROL);
-        addPreferenceHandlerFor(PREF_SONY_WIDE_AREA_TAP);
 
         addPreferenceHandlerFor(PREF_GYMLINK_ENABLED);
         addPreferenceHandlerFor(PREF_ANTPLUS_ENABLED);
         addPreferenceHandlerFor(PREF_HR_BROADCAST);
         addPreferenceHandlerFor(PREF_DUAL_CONNECTION);
 
-        addPreferenceHandlerFor(PREF_MEDIA_SOURCE);
-        addPreferenceHandlerFor(PREF_MEDIA_PLAYBACK_MODE);
-        addPreferenceHandlerFor(PREF_SHOKZ_EQUALIZER_BLUETOOTH);
-        addPreferenceHandlerFor(PREF_SHOKZ_EQUALIZER_MP3);
         addPreferenceHandlerFor(PREF_SOS_CONTACT_NAME);
         addPreferenceHandlerFor(PREF_SOS_CONTACT_NUMBER);
 
@@ -897,6 +986,7 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
         addPreferenceHandlerFor(PREF_SOUNDCORE_WEARING_TONE);
         addPreferenceHandlerFor(PREF_SOUNDCORE_BATTERY_LOW_TONE);
         addPreferenceHandlerFor(PREF_SOUNDCORE_WEARING_DETECTION);
+        addPreferenceHandlerFor(PREF_SOUNDCORE_DUAL_CONNECTION);
         addPreferenceHandlerFor(PREF_SOUNDCORE_CONTROL_TOUCH_DISABLED);
         addPreferenceHandlerFor(PREF_SOUNDCORE_CONTROL_SINGLE_TAP_DISABLED);
         addPreferenceHandlerFor(PREF_SOUNDCORE_CONTROL_DOUBLE_TAP_DISABLED);
@@ -1442,10 +1532,10 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
         setNumericInputTypeWithRangeFor(PREF_OUTPUT_POWER_GRID, 0, 2400, false);
         setNumericInputTypeWithRangeFor(PREF_BATTERY_MINIMUM_CHARGE, 0, 100, false);
         setNumericInputTypeWithRangeFor(PREF_BATTERY_MAXIMUM_CHARGE, 0, 100, false);
-        setNumericInputTypeWithRangeFor(PREF_SOLAR_PANEL1_PEAK_W, 0,1000,false);
-        setNumericInputTypeWithRangeFor(PREF_SOLAR_PANEL2_PEAK_W, 0,1000,false);
-        setNumericInputTypeWithRangeFor(PREF_SOLAR_PANEL3_PEAK_W, 0,1000,false);
-        setNumericInputTypeWithRangeFor(PREF_SOLAR_PANEL4_PEAK_W, 0,1000,false);
+        setNumericInputTypeWithRangeFor(PREF_SOLAR_PANEL1_PEAK_W, 0, 1000, false);
+        setNumericInputTypeWithRangeFor(PREF_SOLAR_PANEL2_PEAK_W, 0, 1000, false);
+        setNumericInputTypeWithRangeFor(PREF_SOLAR_PANEL3_PEAK_W, 0, 1000, false);
+        setNumericInputTypeWithRangeFor(PREF_SOLAR_PANEL4_PEAK_W, 0, 1000, false);
 
         new PasswordCapabilityImpl().registerPreferences(getContext(), coordinator.getPasswordCapability(), this);
         new HeartRateCapability().registerPreferences(getContext(), coordinator.getHeartRateMeasurementIntervals(), this);
@@ -1618,17 +1708,29 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
         final DeviceSpecificSettings deviceSpecificSettings = new DeviceSpecificSettings();
 
         if (applicationSpecificSettings.equals(DeviceSettingsActivity.MENU_ENTRY_POINTS.AUTH_SETTINGS)) { //auth settings screen
-            deviceSpecificSettings.addRootScreen(R.xml.devicesettings_pairingkey_explanation);
             for (final int s : coordinator.getSupportedDeviceSpecificAuthenticationSettings()) {
                 deviceSpecificSettings.addRootScreen(s);
             }
         } else { //device/application settings
-            if (coordinator.getSupportedLanguageSettings(device) != null) {
-                deviceSpecificSettings.addRootScreen(R.xml.devicesettings_language_generic);
-            }
-            DeviceSpecificSettings coordinatorDeviceSettings = coordinator.getDeviceSpecificSettings(device);
-            if (coordinatorDeviceSettings != null) {
-                deviceSpecificSettings.mergeFrom(coordinatorDeviceSettings);
+            final DeviceSettingsSpec modelSpec = coordinator.getDeviceSettings(device);
+            if (modelSpec != null) {
+                for (final DeviceSetting item : modelSpec.getItems()) {
+                    if (item instanceof XmlScreenSetting xmlScreen) {
+                        deviceSpecificSettings.addRootScreen(
+                                xmlScreen.getScreen(),
+                                xmlScreen.getSubScreens().stream().mapToInt(Integer::intValue).toArray()
+                        );
+                    }
+                }
+                deviceSpecificSettings.addConnectedPreferences(modelSpec.collectConnectedKeys());
+            } else {
+                if (coordinator.getSupportedLanguageSettings(device) != null) {
+                    deviceSpecificSettings.addRootScreen(R.xml.devicesettings_language_generic);
+                }
+                final DeviceSpecificSettings coordinatorDeviceSettings = coordinator.getDeviceSpecificSettings(device);
+                if (coordinatorDeviceSettings != null) {
+                    deviceSpecificSettings.mergeFrom(coordinatorDeviceSettings);
+                }
             }
             final int[] supportedAuthSettings = coordinator.getSupportedDeviceSpecificAuthenticationSettings();
             if (supportedAuthSettings != null && supportedAuthSettings.length > 0) {
@@ -1741,6 +1843,10 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
 
     @Override
     public void addPreferenceHandlerFor(final String preferenceKey, final Preference.OnPreferenceChangeListener extraListener) {
+        if (modelManagedKeys != null && modelManagedKeys.contains(preferenceKey)) {
+            LOG.trace("Ignoring addPreferenceHandlerFor {} - already declared in model", preferenceKey);
+            return;
+        }
         Preference pref = findPreference(preferenceKey);
         if (pref != null) {
             pref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
@@ -1761,6 +1867,16 @@ public class DeviceSpecificSettingsFragment extends AbstractPreferenceFragment i
     @Override
     public GBDevice getDevice() {
         return device;
+    }
+
+    @Override
+    public void navigateToScreen(@NonNull final PreferenceScreen screen) {
+        onNavigateToScreen(screen);
+    }
+
+    @Override
+    public void addXmlPreferences(final int resId) {
+        addPreferencesFromResource(resId);
     }
 
     @Override

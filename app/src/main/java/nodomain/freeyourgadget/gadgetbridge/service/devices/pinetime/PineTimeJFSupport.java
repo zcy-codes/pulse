@@ -371,16 +371,17 @@ public class PineTimeJFSupport extends AbstractBTLESingleDeviceSupport implement
     @Override
     public void onSetNavigationInfo(NavigationInfoSpec navigationInfoSpec) {
         TransactionBuilder builder = createTransactionBuilder("navigation info");
-        if (navigationInfoSpec.instruction == null) {
-            navigationInfoSpec.instruction = "";
+        if (navigationInfoSpec.getInstruction() == null) {
+            navigationInfoSpec.setInstruction("");
         }
-        if (navigationInfoSpec.distanceToTurn == null) {
-            navigationInfoSpec.distanceToTurn = "";
+        if (navigationInfoSpec.getDistanceToTurn() == null) {
+            navigationInfoSpec.setDistanceToTurn("");
         }
-        safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_NAVIGATION_NARRATIVE, navigationInfoSpec.instruction.getBytes(StandardCharsets.UTF_8));
-        safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_NAVIGATION_MAN_DISTANCE, navigationInfoSpec.distanceToTurn.getBytes(StandardCharsets.UTF_8));
+        safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_NAVIGATION_NARRATIVE, navigationInfoSpec.getInstruction().getBytes(StandardCharsets.UTF_8));
+        safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_NAVIGATION_MAN_DISTANCE, navigationInfoSpec.getDistanceToTurn().getBytes(StandardCharsets.UTF_8));
+        safeWriteToCharacteristic(builder, PineTimeJFConstants.UUID_CHARACTERISTICS_NAVIGATION_PROGRESS, ByteBuffer.allocate(1).put((byte) navigationInfoSpec.getCompletionPercent()).array());
         String iconname;
-        switch (navigationInfoSpec.nextAction) {
+        switch (navigationInfoSpec.getNextAction()) {
             case NavigationInfoSpec.ACTION_CONTINUE:
                 iconname = "continue";
                 break;
@@ -418,8 +419,17 @@ public class PineTimeJFSupport extends AbstractBTLESingleDeviceSupport implement
             case NavigationInfoSpec.ACTION_ROUNDABOUT_LEFT:
                 iconname = "roundabout-left";
                 break;
+            case NavigationInfoSpec.ACTION_ROUNDABOUT_STRAIGHT:
+                iconname = "roundabout-straight";
+                break;
             case NavigationInfoSpec.ACTION_OFFROUTE:
                 iconname = "close";
+                break;
+            case NavigationInfoSpec.ACTION_FINISH:
+                iconname = "flag";
+                break;
+            case NavigationInfoSpec.ACTION_MERGE:
+                iconname = "merge-straight";
                 break;
             default:
                 iconname = "invalid";

@@ -29,11 +29,6 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 
 public class AmazfitActive3PremiumCoordinator extends ZeppOsCoordinator {
     @Override
-    public boolean isExperimental() {
-        return true;
-    }
-
-    @Override
     public ConnectionType getConnectionType() {
         return ConnectionType.BOTH;
     }
@@ -74,11 +69,6 @@ public class AmazfitActive3PremiumCoordinator extends ZeppOsCoordinator {
 
     @Override
     public boolean supportsToDoList() {
-        return true;
-    }
-
-    @Override
-    public boolean supportsWifiHotspot(final GBDevice device) {
         return true;
     }
 

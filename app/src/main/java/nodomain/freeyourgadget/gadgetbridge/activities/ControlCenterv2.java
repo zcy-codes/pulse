@@ -29,6 +29,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -91,6 +92,7 @@ import nodomain.freeyourgadget.gadgetbridge.util.PermissionsUtils;
 public class ControlCenterv2 extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, GBActivity {
     private static final Logger LOG = LoggerFactory.getLogger(ControlCenterv2.class);
+    public static final long REALTIME_HR_SAMPLE_TTL_MS = 5_000L;
     public static final int MENU_REFRESH_CODE = 1;
     private boolean isLanguageInvalid = false;
     private boolean isThemeInvalid = false;
@@ -141,14 +143,34 @@ public class ControlCenterv2 extends AppCompatActivity
     };
     private boolean pesterWithPermissions = true;
     private final Map<GBDevice, ActivitySample> currentHRSample = new HashMap<>();
+    private final Map<GBDevice, Long> currentHRSampleReceivedAt = new HashMap<>();
 
     public ActivitySample getCurrentHRSample(final GBDevice device) {
-        return currentHRSample.get(device);
+        final ActivitySample sample = currentHRSample.get(device);
+
+        if (!device.getDeviceCoordinator().supportsLiveOnlyHeartRateDisplay(device)) {
+            return sample;
+        }
+
+        final Long receivedAt = currentHRSampleReceivedAt.get(device);
+
+        if (sample == null || receivedAt == null) {
+            return null;
+        }
+
+        if (SystemClock.elapsedRealtime() - receivedAt > REALTIME_HR_SAMPLE_TTL_MS) {
+            currentHRSample.remove(device);
+            currentHRSampleReceivedAt.remove(device);
+            return null;
+        }
+
+        return sample;
     }
 
     private void setCurrentHRSample(final GBDevice device, ActivitySample sample) {
         if (HeartRateUtils.getInstance().isValidHeartRateValue(sample.getHeartRate())) {
             currentHRSample.put(device, sample);
+            currentHRSampleReceivedAt.put(device, SystemClock.elapsedRealtime());
         }
     }
 

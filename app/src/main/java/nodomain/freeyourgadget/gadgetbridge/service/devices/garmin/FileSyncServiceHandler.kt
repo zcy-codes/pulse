@@ -1,12 +1,14 @@
 package nodomain.freeyourgadget.gadgetbridge.service.devices.garmin
 
 import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiFileSyncService
+import nodomain.freeyourgadget.gadgetbridge.proto.garmin.GdiSmartProto
 import nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.deviceevents.FileDownloadedDeviceEvent
 import nodomain.freeyourgadget.gadgetbridge.util.protobuf.buildWith
 import org.slf4j.LoggerFactory
 
 class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
     private var nextPageId: Int? = null
+    private var cursorId: Int? = null
 
     fun handle(fileSyncService: GdiFileSyncService.FileSyncService): GdiFileSyncService.FileSyncService? {
         return when {
@@ -22,18 +24,21 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
 
     private fun handleNewFileNotification(newFileNotification: GdiFileSyncService.NewFileNotification): GdiFileSyncService.FileSyncService? {
         LOG.debug("Got new file notification: {}", newFileNotification)
-        if (!newFileNotification.file.hasType() || !newFileNotification.file.type.hasName()) {
-            LOG.warn("New file has no type name")
-            return null
-        }
-        val fetchUnknownFiles = deviceSupport.devicePrefs.fetchUnknownFiles
-        val typeName = newFileNotification.file.type.name
-        if (!FILE_TYPES_TO_PROCESS.contains(typeName) && !fetchUnknownFiles) {
-            LOG.warn("Ignoring file type: {}", typeName)
-            return null
-        }
+        for(file in newFileNotification.fileList){
+            if (!file.hasType() || !file.type.hasName()) {
+                LOG.warn("New file has no type name: {}", file)
+                continue
+            }
+            val fetchUnknownFiles = deviceSupport.devicePrefs.fetchUnknownFiles
+            val typeName = file.type.name
+            val type = FileType.FILETYPE.findByTypeName(typeName)
+            if (type == null || !(type.pull || fetchUnknownFiles)) {
+                LOG.warn("Ignoring file type: {}", file)
+                continue
+            }
 
-        deviceSupport.addFileToDownloadList(newFileNotification.file)
+            deviceSupport.addFileToDownloadList(file)
+        }
         return null
     }
 
@@ -55,14 +60,13 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
 
     private fun handleFileListResponse(fileListResponse: GdiFileSyncService.FileListResponse): GdiFileSyncService.FileSyncService? {
         LOG.debug(
-            "Handling file list response with {} files, nextPageId={}",
+            "Handling file list response with {} files, cursorId={}, nextPageId={}",
             fileListResponse.fileList.size,
-            fileListResponse.nextPageId
+            if (fileListResponse.hasCursorId()) fileListResponse.cursorId else null,
+            fileListResponse.nextPageId,
         )
 
         val fetchUnknownFiles = deviceSupport.devicePrefs.fetchUnknownFiles
-
-        nextPageId = fileListResponse.nextPageId
 
         // Only the first entry for a type seems to contain the type name, so keep track of them
         val codeMap: MutableMap<Int?, String?> = HashMap()
@@ -80,8 +84,9 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
                 continue
             }
 
-            if (!FILE_TYPES_TO_PROCESS.contains(typeName) && !fetchUnknownFiles) {
-                LOG.warn("Ignoring file type: {}", typeName)
+            val fileType = FileType.FILETYPE.findByTypeName(typeName)
+            if (fileType == null || !(fileType.pull || fetchUnknownFiles)) {
+                LOG.warn("Ignoring file type: {} {}", typeName, fileType)
                 continue
             }
 
@@ -91,25 +96,39 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
 
         // #5461 - some watches to not send the next page ID
         // however, from previous logs, it always seems to match the max seen across all sent items, so attempt
-        // to fallback to that as a workaround so we can fetch the subsequent files
-        if (fileListResponse.nextPageId == 0) {
-            nextPageId = fileListResponse.fileList
-                .mapNotNull { it.pageId }
-                .maxOrNull() ?: 0
+        // to fall back to that as a workaround so we can fetch the subsequent files
+        nextPageId = fileListResponse.nextPageId
+
+        // The device sets cursor_id when there are more items pending for *this same* listing
+        // request. Keep pulling pages within this cursor immediately instead of stopping after
+        // one page - otherwise anything past the first ~100 items (which can easily be all SPORTS
+        // backlog) is never seen.
+        cursorId = if (fileListResponse.hasCursorId()) fileListResponse.cursorId else null
+        if (cursorId != null) {
+            deviceSupport.sendProtobufRequest(
+                "continue file list",
+                GdiSmartProto.Smart.newBuilder().setFileSyncService(requestFileList()).build()
+            )
         }
 
         return null
     }
 
     fun requestFileList(): GdiFileSyncService.FileSyncService {
-        LOG.debug("Requesting file list starting at page {}", nextPageId)
+        LOG.debug("Requesting file list starting at page {} (cursorId={})", nextPageId, cursorId)
 
         val fileListRequestBuilder = GdiFileSyncService.FileListRequest.newBuilder().apply {
-            flags1 = GdiFileSyncService.FileId.newBuilder().setId1(42405).setId2(42405).build()
-            flags2 = GdiFileSyncService.FileId.newBuilder().setId1(42405).setId2(42405).build()
+            // Exclusion flags? If we omit this, it sends back already synced files going back months.
+            flags1 = GdiFileSyncService.FileId.newBuilder().setId1(FLAGS_SYNCED).setId2(FLAGS_SYNCED).build()
+            flags2 = GdiFileSyncService.FileId.newBuilder().setId1(FLAGS_SYNCED).setId2(FLAGS_SYNCED).build()
         }
 
-        nextPageId?.let { fileListRequestBuilder.startPageId = it }
+        val currentcursorId = cursorId
+        if (currentcursorId != null) {
+            fileListRequestBuilder.cursorId = currentcursorId
+        } else {
+            nextPageId?.let { fileListRequestBuilder.startPageId = it }
+        }
 
         return GdiFileSyncService.FileSyncService.newBuilder().buildWith {
             fileListRequest = fileListRequestBuilder.build()
@@ -143,7 +162,8 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
                 LOG.warn("Will not mark {}/{} as synced - unknown type", syncFile.id.id1, syncFile.id.id2)
                 return null
             }
-            if (!FILE_TYPES_TO_PROCESS.contains(syncFile.type.name)) {
+            val fileType = FileType.FILETYPE.findByTypeName(syncFile.type.name);
+            if (fileType == null || !fileType.pull) {
                 LOG.warn(
                     "Will not mark {}/{} ({}) as synced - not a file to process",
                     syncFile.id.id1,
@@ -157,7 +177,7 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
         return GdiFileSyncService.FileSyncService.newBuilder().buildWith {
             fileSetFlags = GdiFileSyncService.FileSetFlags.newBuilder().buildWith {
                 file = syncFile.id
-                flags = GdiFileSyncService.FileId.newBuilder().setId1(42405).setId2(42405).build()
+                flags = GdiFileSyncService.FileId.newBuilder().setId1(FLAGS_SYNCED).setId2(FLAGS_SYNCED).build()
             }
         }
     }
@@ -165,25 +185,6 @@ class FileSyncServiceHandler(val deviceSupport: GarminSupport) {
     companion object {
         private val LOG = LoggerFactory.getLogger(FileSyncServiceHandler::class.java)
 
-        private val FILE_TYPES_TO_PROCESS: Set<String?> = setOf(
-            "FIT_TYPE_4", // ACTIVITY
-            "FIT_TYPE_32", // MONITOR
-            "FIT_TYPE_44", // METRICS
-            "FIT_TYPE_41", // CHANGELOG
-            "FIT_TYPE_68", // HRV_STATUS
-            "FIT_TYPE_49", // SLEEP
-            "FIT_TYPE_61", // ECG
-            "FIT_TYPE_73", // SKIN_TEMP
-            // #5824 - We need to sync some files we don't handle, to prevent the watches
-            // from starting to have issues / run out of memory
-            "FIT_TYPE_58", // DEVICE_58
-            "FIT_TYPE_79", // SLP_DISR
-            "ErrorShutdownReports", // ERROR_SHUTDOWN_REPORTS
-            "FIT_TYPE_38", // SCORE
-            "FIT_TYPE_70", // HSA
-            "FIT_TYPE_71", // COM_ACT
-            "FIT_TYPE_82", // AREA_COURSES
-            "FIT_TYPE_35", // SEGMENT_LIST
-        )
+        private const val FLAGS_SYNCED = 42405L
     }
 }

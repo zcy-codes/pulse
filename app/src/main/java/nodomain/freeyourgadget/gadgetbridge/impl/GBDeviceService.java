@@ -33,12 +33,14 @@ import android.provider.ContactsContract;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
@@ -60,7 +62,11 @@ import nodomain.freeyourgadget.gadgetbridge.model.WorldClock;
 import nodomain.freeyourgadget.gadgetbridge.service.DeviceCommunicationService;
 import nodomain.freeyourgadget.gadgetbridge.util.RtlUtils;
 
-
+/**
+ * Fires an intent with an action to be called on the DeviceSupport class, to be handled by DeviceCommunicationService.
+ * The intents created here must be handled in {@link nodomain.freeyourgadget.gadgetbridge.service.DeviceActionHandler}
+ * accordingly.
+ */
 public class GBDeviceService implements DeviceService {
     protected final Context mContext;
     private final GBDevice mDevice;
@@ -81,6 +87,10 @@ public class GBDeviceService implements DeviceService {
             EXTRA_CALENDAREVENT_LOCATION,
             EXTRA_CALENDAREVENT_CALNAME,
     };
+    private final Executor mainExecutor = ContextCompat.getMainExecutor(GBApplication.getContext());
+
+    private final ConflatingDispatcher<NavigationInfoSpec> navigationDispatcher =
+            new ConflatingDispatcher<>(mainExecutor, this::forwardNavigationInfo);
     private static final Logger LOG = LoggerFactory.getLogger(GBDeviceService.class);
 
     public GBDeviceService(@NonNull Context context) {
@@ -183,6 +193,7 @@ public class GBDeviceService implements DeviceService {
                 .putExtra(EXTRA_NOTIFICATION_SOURCENAME, notificationSpec.sourceName)
                 .putExtra(EXTRA_NOTIFICATION_SOURCEAPPID, notificationSpec.sourceAppId)
                 .putExtra(EXTRA_NOTIFICATION_ICONID, notificationSpec.iconId)
+                .putExtra(EXTRA_NOTIFICATION_ICONPACKAGEID, notificationSpec.iconPackageId)
                 .putExtra(NOTIFICATION_PICTURE_PATH, notificationSpec.picturePath)
                 .putExtra(EXTRA_NOTIFICATION_DNDSUPPRESSED, notificationSpec.dndSuppressed)
                 .putExtra(EXTRA_NOTIFICATION_CHANNEL_ID, notificationSpec.channelId)
@@ -220,7 +231,7 @@ public class GBDeviceService implements DeviceService {
         } else if (currentPrivacyMode.equals(context.getString(R.string.p_call_privacy_mode_complete))) {
             callSpec.number = null;
             callSpec.name = null;
-        } else if (currentPrivacyMode.equals(context.getString(R.string.p_call_privacy_mode_number))){
+        } else if (currentPrivacyMode.equals(context.getString(R.string.p_call_privacy_mode_number))) {
             callSpec.name = coalesce(callSpec.name, getContactDisplayNameByNumber(callSpec.number));
             if (callSpec.name != null && !callSpec.name.equals(callSpec.number)) {
                 callSpec.number = null;
@@ -318,11 +329,21 @@ public class GBDeviceService implements DeviceService {
 
     @Override
     public void onSetNavigationInfo(@NonNull NavigationInfoSpec navigationInfoSpec) {
+        navigationDispatcher.offer(navigationInfoSpec);
+    }
+
+    private void forwardNavigationInfo(NavigationInfoSpec navigationInfoSpec) {
         Intent intent = createIntent().setAction(ACTION_SETNAVIGATIONINFO)
-                .putExtra(EXTRA_NAVIGATION_INSTRUCTION, navigationInfoSpec.instruction)
-                .putExtra(EXTRA_NAVIGATION_NEXT_ACTION, navigationInfoSpec.nextAction)
-                .putExtra(EXTRA_NAVIGATION_DISTANCE_TO_TURN, navigationInfoSpec.distanceToTurn)
-                .putExtra(EXTRA_NAVIGATION_ETA, navigationInfoSpec.ETA);
+                .putExtra(EXTRA_NAVIGATION_INSTRUCTION, navigationInfoSpec.getInstruction())
+                .putExtra(EXTRA_NAVIGATION_NEXT_ACTION, navigationInfoSpec.getNextAction())
+                .putExtra(EXTRA_NAVIGATION_DISTANCE_TO_TURN, navigationInfoSpec.getDistanceToTurn())
+                .putExtra(EXTRA_NAVIGATION_DISTANCE_TO_TARGET, navigationInfoSpec.getDistanceToTarget())
+                .putExtra(EXTRA_NAVIGATION_COMPLETION_PERCENT, navigationInfoSpec.getCompletionPercent());
+        if(navigationInfoSpec.getTotalTimeToDestination() != null) {
+            intent.putExtra(EXTRA_NAVIGATION_TIME_TO_DESTINATION, navigationInfoSpec.getTotalTimeToDestination());
+        } else {
+            intent.putExtra(EXTRA_NAVIGATION_ETA, navigationInfoSpec.getETA());
+        }
         invokeService(intent);
     }
 
@@ -428,7 +449,7 @@ public class GBDeviceService implements DeviceService {
     @Override
     public void onFindPhone(final boolean start) {
         Intent intent = createIntent().setAction(ACTION_PHONE_FOUND)
-                        .putExtra(EXTRA_FIND_START, start);
+                .putExtra(EXTRA_FIND_START, start);
         invokeService(intent);
     }
 

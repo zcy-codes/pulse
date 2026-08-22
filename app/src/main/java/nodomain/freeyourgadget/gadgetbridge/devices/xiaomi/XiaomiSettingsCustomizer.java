@@ -20,6 +20,7 @@ import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.Dev
 import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsUtils.populateOrHideListPreference;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Parcel;
 import android.widget.Toast;
@@ -44,10 +45,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsCustomizer;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsHandler;
+import nodomain.freeyourgadget.gadgetbridge.activities.xiaomi.XiaomiVibrationPatternsActivity;
 import nodomain.freeyourgadget.gadgetbridge.devices.huami.HuamiConst;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.xiaomi.activity.XiaomiActivityFileFetcher;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.xiaomi.activity.XiaomiActivityFileId;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.xiaomi.activity.XiaomiActivityParser;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.xiaomi.services.XiaomiVibrationManager;
 import nodomain.freeyourgadget.gadgetbridge.util.FileUtils;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs;
@@ -65,6 +69,16 @@ public class XiaomiSettingsCustomizer implements DeviceSpecificSettingsCustomize
         if (reprocessActivityPref != null) {
             reprocessActivityPref.setOnPreferenceClickListener(preference -> {
                 parseAllActivityFilesFromStorage(handler.getContext(), handler.getDevice());
+                return true;
+            });
+        }
+
+        final Preference vibrationPatternsPref = handler.findPreference(XiaomiVibrationManager.PREF_PATTERNS_SCREEN);
+        if (vibrationPatternsPref != null) {
+            vibrationPatternsPref.setOnPreferenceClickListener(preference -> {
+                final Intent intent = new Intent(handler.getContext(), XiaomiVibrationPatternsActivity.class);
+                intent.putExtra(GBDevice.EXTRA_DEVICE, handler.getDevice());
+                handler.getContext().startActivity(intent);
                 return true;
             });
         }
@@ -202,6 +216,14 @@ public class XiaomiSettingsCustomizer implements DeviceSpecificSettingsCustomize
                         final byte[] fixedData = XiaomiActivityParser.fixAndWrap(data).array();
                         if (activityParser.parse(context, device, fileId, fixedData)) {
                             LOG.info("Successfully parsed {}", fileId);
+                            // Mirror the registry write that XiaomiActivityFileFetcher does
+                            // during initial fetch — needed after DB import / restore so
+                            // XiaomiActivityTrackProvider can resolve the raw file on demand.
+                            XiaomiActivityFileFetcher.registerActivityFile(device, fileId, activityFile);
+                        } else if (fixedData.length <= 16) {
+                            // Placeholder file (e.g. indoor GPS_TRACK with no fix) — logged
+                            // separately inside the parser. Avoid the WARN-level "Failed to parse".
+                            LOG.info("Skipped empty placeholder {}", fileId);
                         } else {
                             LOG.warn("Failed to parse {}", fileId);
                         }

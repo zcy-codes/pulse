@@ -1371,7 +1371,7 @@ public class FossilHRWatchAdapter extends FossilWatchAdapter {
                 try {
                     Drawable icon = null;
                     if (notificationSpec.iconId != 0) {
-                        Context sourcePackageContext = getContext().createPackageContext(sourceAppId, 0);
+                        Context sourcePackageContext = getContext().createPackageContext(notificationSpec.iconPackageId, 0);
                         icon = ResourcesCompat.getDrawable(sourcePackageContext.getResources(), notificationSpec.iconId, null);
                     }
                     if (icon == null) {
@@ -2188,10 +2188,10 @@ public class FossilHRWatchAdapter extends FossilWatchAdapter {
                     .put("push", new JSONObject()
                             .put("set", new JSONObject()
                                     .put("navigationApp._.config.info", new JSONObject()
-                                            .put("distance", navigationInfoSpec.distanceToTurn)
-                                            .put("eta", navigationInfoSpec.ETA)
-                                            .put("instruction", navigationInfoSpec.instruction)
-                                            .put("nextAction", navigationInfoSpec.nextAction)
+                                            .put("distance", navigationInfoSpec.getDistanceToTurn())
+                                            .put("eta", navigationInfoSpec.getETA())
+                                            .put("instruction", navigationInfoSpec.getInstruction())
+                                            .put("nextAction", navigationInfoSpec.getNextAction())
                                             .put("autoFg", prefs.getBoolean("fossil_hr_nav_auto_foreground", true))
                                             .put("vibrate", prefs.getBoolean("fossil_hr_nav_vibrate", true))
                                     )

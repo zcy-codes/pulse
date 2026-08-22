@@ -36,9 +36,13 @@ sourceSets {
 
 tasks.register<JavaExec>("genSources") {
     inputs.dir("src")
+    inputs.dir("src-template")
     outputs.dir(project.rootProject.file("app/build/generated/sources/gbdao"))
 
     mainClass = application.mainClass
     classpath = sourceSets.main.get().runtimeClasspath
     workingDir = file("../")
+    if (gradle.startParameter.logLevel <= LogLevel.INFO) {
+        jvmArgs("-Dverbose=true")
+    }
 }

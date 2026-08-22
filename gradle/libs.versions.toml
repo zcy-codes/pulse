@@ -27,6 +27,7 @@ cyanogenmod = "6.0"
 desugar-jdk-libs = "2.1.5"
 dfu = "2.11.0"
 durationformatter = "0.1.1"
+exifinterface = "1.4.2"
 flexbox = "3.0.0"
 freemarker = "2.3.34"
 greendao = "2.2.1"
@@ -116,6 +117,7 @@ slf4j-api = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
 solarpositioning = { group = "net.e175.klaus", name = "solarpositioning", version.ref = "solarpositioning" }
 androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "security-crypto" }
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
+androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
 
 [bundles]
 android-emojify = [

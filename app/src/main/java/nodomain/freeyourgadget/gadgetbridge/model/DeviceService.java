@@ -106,6 +106,7 @@ public interface DeviceService extends EventHandler {
     String EXTRA_NOTIFICATION_TYPE = "notification_type";
     String EXTRA_NOTIFICATION_ACTIONS = "notification_actions";
     String EXTRA_NOTIFICATION_ICONID = "notification_iconid";
+    String EXTRA_NOTIFICATION_ICONPACKAGEID = "notification_iconpackageid";
     String NOTIFICATION_PICTURE_PATH = "notification_picture_path";
     String EXTRA_NOTIFICATION_DNDSUPPRESSED = "notification_dndsuppressed";
     String EXTRA_NOTIFICATION_CHANNEL_ID = "notification_channel_id";
@@ -139,8 +140,11 @@ public interface DeviceService extends EventHandler {
     String EXTRA_PHONE_RINGER_MODE = "ringer_mode";
     String EXTRA_NAVIGATION_INSTRUCTION = "navigation_instruction";
     String EXTRA_NAVIGATION_DISTANCE_TO_TURN = "navigation_distance_to_turn";
+    String EXTRA_NAVIGATION_DISTANCE_TO_TARGET = "navigation_distance_to_target";
     String EXTRA_NAVIGATION_NEXT_ACTION = "navigation_next_action";
     String EXTRA_NAVIGATION_ETA = "navigation_eta";
+    String EXTRA_NAVIGATION_TIME_TO_DESTINATION = "navigation_time_to_destination";
+    String EXTRA_NAVIGATION_COMPLETION_PERCENT = "navigation_completion_percent";
     String EXTRA_APP_UUID = "app_uuid";
     String EXTRA_APP_START = "app_start";
     String EXTRA_APP_CONFIG = "app_config";

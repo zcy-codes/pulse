@@ -116,6 +116,7 @@
     <string name="appmananger_app_delete_cache">Delete and remove from cache</string>
     <string name="appmananger_app_reinstall">Reinstall</string>
     <string name="appmanager_app_share">Share</string>
+    <string name="appmanager_app_store">App store</string>
     <string name="appmanager_app_openinstore">Search in Pebble appstore</string>
     <string name="appmanager_health_activate">Activate</string>
     <string name="appmanager_health_deactivate">Deactivate</string>
@@ -195,6 +196,7 @@
     <string name="open_source_licenses">Licenses</string>
     <string name="dialog_close">Close</string>
     <string name="dialog_open_url">Open URL</string>
+    <string name="refresh">Refresh</string>
     <string name="open_fw_installer_select_file">Select a file you want to upload to device: %s</string>
     <string name="open_fw_installer_connect_minimum_one_device">Please connect AT LEAST ONE device you want to send the file to.</string>
     <string name="open_fw_installer_connect_maximum_one_device">Please connect ONLY ONE device you want to send the file to.</string>
@@ -226,6 +228,8 @@
     <string name="pref_title_general_autoconnectonbluetooth">Connect to Gadgetbridge device(s) when Bluetooth is turned on</string>
     <string name="pref_title_general_reconnectonlytoconnected">Reconnect only to connected devices</string>
     <string name="pref_summary_general_reconnectonlytoconnected">Reconnect only to connected devices, instead of reconnecting to all devices</string>
+    <string name="pref_title_general_prefs_key_sort_by_last_connected_ts">Sort by last connection date</string>
+    <string name="pref_summary_general_prefs_key_sort_by_last_connected_ts">Order disconnected devices by when they last connected, instead of alphabetically</string>
     <string name="pref_title_general_autostartonboot">Start automatically</string>
     <string name="pref_title_general_autoreconnect">Reconnect automatically</string>
     <string name="pref_title_mb_intents">Broadcast Media Button Intents Directly</string>
@@ -300,6 +304,8 @@
     <string name="pref_summary_notifications_ignore_low_priority">Do not send low and minimum priority notifications to the watch</string>
     <string name="pref_title_notifications_ignore_work_profile">Ignore work profile notifications</string>
     <string name="pref_summary_notifications_ignore_work_profile">Do not send notifications from apps in the work profile to the watch</string>
+    <string name="pref_title_notifications_ignore_other_users">Ignore other user profiles</string>
+    <string name="pref_summary_notifications_ignore_other_users">Do not send notifications from other user profiles the watch</string>
     <string name="pref_title_notification_prefer_long_text">Prefer long notification text</string>
     <string name="pref_summary_notification_prefer_long_text">If available, send the long notification text to the device</string>
     <string name="pref_title_notification_cache_while_disconnected">Cache while out of range</string>
@@ -360,6 +366,7 @@
     <string name="pref_title_canned_messages_set">Update on device</string>
     <string name="pref_header_development">Developer options</string>
     <string name="pref_header_intent_api">Intent API</string>
+    <string name="authentication_settings">Authentication settings</string>
     <string name="pref_header_authentication">Authentication</string>
     <string name="pref_title_development_miaddr">Mi Band address</string>
     <string name="pref_title_pebble_settings">Pebble settings</string>
@@ -392,6 +399,16 @@
     <string name="pref_summary_casio_alert_sms">Alert (vibrate/beep) for SMS (text message) notifications</string>
     <string name="pref_title_casio_alert_other">Alert for \"other\" notifications</string>
     <string name="pref_summary_casio_alert_other">Alert (vibrate/beep) for notifications in the \"other\" category</string>
+    <string name="pref_casio_interval_timer_title">Interval timer</string>
+    <string name="casio_interval_timer_add">Add timer</string>
+    <string name="casio_interval_timer_empty">No interval timers yet. Tap + to add one.</string>
+    <string name="casio_interval_timer_limit_reached">Maximum of 50 timers reached</string>
+    <string name="casio_interval_timer_active">Active on watch</string>
+    <string name="casio_interval_timer_slot">Step %1$d</string>
+    <string name="casio_interval_timer_skip">Skip</string>
+    <string name="casio_interval_timer_repeat">Auto-repeat</string>
+    <string name="casio_interval_timer_default_label">Timer %1$d</string>
+    <string name="casio_interval_timer_total">Total: %1$s × %2$d = %3$s</string>
     <string name="pref_title_autoremove_notifications">Autoremove dismissed notifications</string>
     <string name="pref_summary_autoremove_notifications">Notifications are automatically removed from the device when dismissed from the phone</string>
     <string name="pref_title_screen_on_on_notifications">Screen On on Notifications</string>
@@ -664,6 +681,11 @@
     <string name="pref_auto_export_gpx_all_devices_summary">Export GPX tracks from all devices</string>
     <string name="pref_auto_export_gpx_selected_devices">Selected devices</string>
     <string name="pref_auto_export_gpx_selected_devices_summary">Choose which devices to export GPX tracks from</string>
+    <!-- FIT Auto export -->
+    <string name="pref_header_auto_export_fit">Auto export FIT tracks</string>
+    <string name="pref_auto_export_fit_summary">Automatically export FIT files when syncing activity tracks</string>
+    <string name="pref_auto_export_fit_all_devices_summary">Export FIT tracks from all devices</string>
+    <string name="pref_auto_export_fit_selected_devices_summary">Choose which devices to export FIT tracks from</string>
     <!-- Auto fetch activity preferences -->
     <string name="pref_header_auto_fetch">Auto fetch</string>
     <string name="pref_auto_fetch">Auto fetch activity data</string>
@@ -710,6 +732,7 @@
     <string name="firmware_install_warning">YOU ARE TRYING TO INSTALL A FIRMWARE, PROCEED AT YOUR OWN RISK.\n\n\n This firmware is for HW Revision: %s</string>
     <string name="app_install_info">You are about to install the following app:\n\n%1$s\nVersion %2$s by %3$s\n</string>
     <string name="watchface_install_info">You are about to install the following watchface:\n\n%1$s\nVersion %2$s by %3$s\n</string>
+    <string name="create_watchface">Create watchface</string>
     <string name="music_upload_info">You are about to upload the following music file:\n\n%1$s\nSong title: %2$s\nAlbum: %3$s\n</string>
     <string name="n_a">N/A</string>
     <string name="initialized">initialized</string>
@@ -799,6 +822,7 @@
     <string name="busy_task_fetch_training_data_finished">Training data received!</string>
     <string name="busy_task_processing_files">Processing files</string>
     <string name="busy_task_progress_int">%1$d of %2$d</string>
+    <string name="busy_task_progress_str">%1$s of %2$s</string>
     <string name="busy_task_busy">Busy…</string>
     <string name="busy_task_configuring">Configuring</string>
     <string name="busy_task_downloading">Downloading</string>
@@ -911,12 +935,15 @@
     <string name="reminder_every_month">Every month</string>
     <string name="reminder_every_year">Every year</string>
     <string name="reminder_delete_confirm_title">Delete reminder</string>
+    <string name="add_reminder">Add reminder</string>
     <string name="reminder_delete_confirm_description">Are you sure you want to delete the reminder?</string>
     <string name="reminder_no_free_slots_title">No free slots</string>
     <string name="reminder_no_free_slots_description">The device has no free slots for reminders (total slots: %1$s)</string>
+    <string name="add_contact">Add contact</string>
     <string name="contact_delete_confirm_title">Delete contact</string>
     <string name="contact_delete_confirm_description">Are you sure you want to delete \"%1$s\"?</string>
     <string name="contact_no_free_slots_description">The device has no free slots for contacts (total slots: %1$s)</string>
+    <string name="add_world_clock">Add world clock</string>
     <string name="world_clock_delete_confirm_title">Delete \"%1$s\"</string>
     <string name="world_clock_delete_confirm_description">Are you sure you want to delete the world clock?</string>
     <string name="world_clock_no_free_slots_title">No free slots</string>
@@ -962,7 +989,7 @@
     <string name="prefs_relaxation_reminder_description">Vibrate the band to notify you if the stress value is higher than 80</string>
     <string name="prefs_spo2_monitoring_title">Blood Oxygen Monitoring</string>
     <string name="prefs_spo2_monitoring_description">Automatically monitor the blood oxygen levels throughout the day</string>
-    <string name="prefs_spo2_alert_threshold">SPO2 alert threshold</string>
+    <string name="prefs_spo2_alert_threshold">SpO2 alert threshold</string>
     <string name="prefs_activity_monitoring_title">Activity monitoring</string>
     <string name="prefs_activity_monitoring_description">Automatically increase the heart rate detection frequency when the band detects physical exercise, to increase heart rate capture accuracy.</string>
     <string name="dbaccess_error_executing">Error executing \"%1$s\"</string>
@@ -1053,6 +1080,7 @@
     <string name="music_upload_failed">Music upload failed</string>
     <string name="music_upload_complete">Music upload complete</string>
     <string name="music_upload_in_progress">Uploading music</string>
+    <string name="upload_music">Upload music</string>
     <string name="updatefirmwareoperation_failed_low_mtu">Current MTU of %1$d is too low, please enable high MTU in the device settings and disconnect/re-connect the device.</string>
     <string name="chart_steps">Steps</string>
     <string name="calories">Calories</string>
@@ -1276,6 +1304,18 @@
     <string name="lefun_prefs_antilost_title">Anti-loss</string>
     <string name="lefun_prefs_antilost_summary">The band will vibrate if your phone disconnects from the band</string>
     <string name="lefun_prefs_interface_language_title">Interface language</string>
+    <string name="ak102_prefs_audio_header">Bluetooth call audio</string>
+    <string name="ak102_pref_audio_auto_connect_title">Auto-connect call audio</string>
+    <string name="ak102_pref_audio_auto_connect_summary">Reconnect the watch as a Bluetooth headset whenever it connects. Calls, contacts and call records on the watch need this link.</string>
+    <string name="ak102_pref_audio_pair_title">Pair call audio</string>
+    <string name="ak102_pref_audio_pair_summary">Pair the watch\'s Bluetooth Classic side and connect the audio profiles</string>
+    <string name="ak102_pref_audio_unpair_title">Unpair call audio</string>
+    <string name="ak102_pref_audio_unpair_summary">Remove the Bluetooth pairing with the watch</string>
+    <string name="ak102_audio_pairing_started">Pairing call audio, accept the pairing request on phone and watch if prompted</string>
+    <string name="ak102_audio_connected">Call audio pairing done</string>
+    <string name="ak102_audio_unpaired">Call audio unpaired</string>
+    <string name="ak102_pref_display_items_title">Display items</string>
+    <string name="ak102_pref_display_items_summary">Screens shown on the watch</string>
     <string name="automatic">Automatic</string>
     <string name="manual">Manual</string>
     <string name="simplified_chinese">Chinese (Simplified)</string>
@@ -1379,6 +1419,13 @@
     <string name="authentication_required">Authentication required</string>
     <string name="authentication_failed_check_key">Authentication failed, please check auth key</string>
     <string name="authentication_failed_negotiation">Authentication key negotiation failed</string>
+    <string name="click_here_for_more_information">Click here for more information.</string>
+    <string name="authentication_expired">Authentication expired</string>
+    <string name="expiration_notifications_title">Expiration notification</string>
+    <string name="auth_expiration_notifications_summary">Display a notification when authentication is expired.</string>
+    <string name="garmin_oauth_expired_description">Authentication for %1$s has expired, some functions may not work. Click here for more information.</string>
+    <string name="garmin_auth_expired_activity_description">The authentication token for \'%1$s\' has expired, so some functions (such as weather and AGPS updates) may stop working until it is re-authenticated with the official Garmin Connect app.\n\nAs a workaround, Gadgetbridge can send fake authentication responses to the watch instead. Do not enable this if you plan to use the official Garmin Connect app or connect the watch to the internet, as you may need to factory reset the watch afterwards to authenticate again.</string>
+    <string name="dont_show_again">Don\'t show again</string>
     <string name="activity_prefs_sleep_duration_minutes">Preferred sleep duration in minutes</string>
     <string name="device_hw">Hardware revision: %1$s</string>
     <string name="device_fw">Firmware version: %1$s</string>
@@ -1661,12 +1708,15 @@
     <string name="activity_type_other">Other</string>
     <string name="activity_type_trekking">Trekking</string>
     <string name="activity_type_trail_run">Trail run</string>
+    <string name="activity_type_trail_hike">Trail hike</string>
+    <string name="activity_type_mma_hiit">MMA HIIT</string>
     <string name="activity_type_wrestling">Wrestling</string>
     <string name="activity_type_unknown">Unknown activity</string>
     <string name="activity_type_navigate">Navigate</string>
     <string name="activity_type_indoor_track">Indoor Track</string>
     <string name="activity_type_handcycling">Handcycling</string>
     <string name="activity_type_e_bike">E-Bike</string>
+    <string name="activity_type_e_scooter">E-Scooter</string>
     <string name="activity_type_bike_commute">Bike Commute</string>
     <string name="activity_type_handcycling_indoor">Handcycling Indoor</string>
     <string name="activity_type_transition">Transition</string>
@@ -1915,6 +1965,8 @@
     <string name="devicetype_amazfit_balance" translatable="false">Amazfit Balance</string>
     <string name="devicetype_amazfit_balance_2" translatable="false">Amazfit Balance 2</string>
     <string name="devicetype_amazfit_balance_2_xt" translatable="false">Amazfit Balance 2 XT</string>
+    <string name="devicetype_amazfit_balance_3" translatable="false">Amazfit Balance 3</string>
+    <string name="devicetype_amazfit_balance_ultra" translatable="false">Amazfit Balance Ultra</string>
     <string name="devicetype_amazfit_active" translatable="false">Amazfit Active</string>
     <string name="devicetype_amazfit_active_2" translatable="false">Amazfit Active 2</string>
     <string name="devicetype_amazfit_active_2_round" translatable="false">Amazfit Active 2 (Round)</string>
@@ -1926,6 +1978,8 @@
     <string name="devicetype_amazfit_cheetah_round" translatable="false">Amazfit Cheetah (Round)</string>
     <string name="devicetype_amazfit_cheetah_pro" translatable="false">Amazfit Cheetah Pro</string>
     <string name="devicetype_amazfit_cheetah_2_pro" translatable="false">Amazfit Cheetah 2 Pro</string>
+    <string name="devicetype_amazfit_cheetah_2_ultra" translatable="false">Amazfit Cheetah 2 Ultra</string>
+    <string name="devicetype_amazfit_bip_max" translatable="false">Amazfit Bip Max</string>
     <string name="devicetype_amazfit_gts3" translatable="false">Amazfit GTS 3</string>
     <string name="devicetype_amazfit_gts4" translatable="false">Amazfit GTS 4</string>
     <string name="devicetype_amazfit_gts4_mini" translatable="false">Amazfit GTS 4 Mini</string>
@@ -1988,12 +2042,14 @@
     <string name="devicetype_garmin_venu_3s" translatable="false">Garmin Venu 3S</string>
     <string name="devicetype_garmin_venu_4" translatable="false">Garmin Venu 4</string>
     <string name="devicetype_garmin_venu_x1" translatable="false">Garmin Venu X1</string>
+    <string name="devicetype_garmin_cirqa" translatable="false">Garmin CIRQA</string>
     <string name="devicetype_garmin_edge_25" translatable="false">Garmin Edge 25</string>
     <string name="devicetype_garmin_edge_130" translatable="false">Garmin Edge 130</string>
     <string name="devicetype_garmin_edge_130_plus" translatable="false">Garmin Edge 130 Plus</string>
     <string name="devicetype_garmin_edge_540" translatable="false">Garmin Edge 540</string>
     <string name="devicetype_garmin_edge_840" translatable="false">Garmin Edge 840</string>
     <string name="devicetype_garmin_edge_1040" translatable="false">Garmin Edge 1040</string>
+    <string name="devicetype_garmin_edge_1050" translatable="false">Garmin Edge 1050</string>
     <string name="devicetype_garmin_edge_explore" translatable="false">Garmin Edge Explore</string>
     <string name="devicetype_garmin_edge_explore_2" translatable="false">Garmin Edge Explore 2</string>
     <string name="devicetype_garmin_gpsmap_66s" translatable="false">Garmin GPSMAP 66s</string>
@@ -2008,10 +2064,12 @@
     <string name="devicetype_garmin_fenix_5" translatable="false">Garmin Fenix 5</string>
     <string name="devicetype_garmin_fenix_5s" translatable="false">Garmin Fenix 5S</string>
     <string name="devicetype_garmin_fenix_5_plus" translatable="false">Garmin Fenix 5 Plus</string>
+    <string name="devicetype_garmin_fenix_5s_plus" translatable="false">Garmin Fenix 5S Plus</string>
     <string name="devicetype_garmin_fenix_5x_plus" translatable="false">Garmin Fenix 5X Plus</string>
     <string name="devicetype_garmin_fenix_6" translatable="false">Garmin Fenix 6</string>
     <string name="devicetype_garmin_fenix_6_pro" translatable="false">Garmin Fenix 6 Pro</string>
     <string name="devicetype_garmin_fenix_6_sapphire" translatable="false">Garmin Fenix 6 Sapphire</string>
+    <string name="devicetype_garmin_fenix_6s" translatable="false">Garmin Fenix 6S</string>
     <string name="devicetype_garmin_fenix_6s_pro" translatable="false">Garmin Fenix 6S Pro</string>
     <string name="devicetype_garmin_fenix_6s_pro_solar" translatable="false">Garmin Fenix 6S Pro Solar</string>
     <string name="devicetype_garmin_fenix_6s_sapphire" translatable="false">Garmin Fenix 6S Sapphire</string>
@@ -2054,6 +2112,8 @@
     <string name="devicetype_garmin_forerunner_165" translatable="false">Garmin Forerunner 165</string>
     <string name="devicetype_garmin_forerunner_165_music" translatable="false">Garmin Forerunner 165 Music</string>
     <string name="devicetype_garmin_forerunner_170" translatable="false">Garmin Forerunner 170</string>
+    <string name="devicetype_garmin_forerunner_170_music" translatable="false">Garmin Forerunner 170 Music</string>
+    <string name="devicetype_garmin_forerunner_230" translatable="false">Garmin Forerunner 230</string>
     <string name="devicetype_garmin_forerunner_235" translatable="false">Garmin Forerunner 235</string>
     <string name="devicetype_garmin_forerunner_245" translatable="false">Garmin Forerunner 245</string>
     <string name="devicetype_garmin_forerunner_245_music" translatable="false">Garmin Forerunner 245 Music</string>
@@ -2074,6 +2134,7 @@
     <string name="devicetype_garmin_forerunner_945" translatable="false">Garmin Forerunner 945</string>
     <string name="devicetype_garmin_forerunner_955" translatable="false">Garmin Forerunner 955</string>
     <string name="devicetype_garmin_forerunner_965" translatable="false">Garmin Forerunner 965</string>
+    <string name="devicetype_garmin_forerunner_970" translatable="false">Garmin Forerunner 970</string>
     <string name="devicetype_garmin_swim_2" translatable="false">Garmin Swim 2</string>
     <string name="devicetype_garmin_vivoactive_3" translatable="false">Garmin Vívoactive 3</string>
     <string name="devicetype_garmin_vivoactive_4" translatable="false">Garmin Vívoactive 4</string>
@@ -2133,6 +2194,9 @@
     <string name="devicetype_fitpro" translatable="false">FitPro</string>
     <string name="devicetype_colacao21" translatable="false">ColaCao 2021</string>
     <string name="devicetype_colacao23" translatable="false">ColaCao 2023</string>
+    <string name="devicetype_ak102" translatable="false">AK102</string>
+    <string name="devicetype_ak75_pro" translatable="false">AK75 PRO</string>
+    <string name="devicetype_ak86" translatable="false">AK86</string>
     <string name="devicetype_domyos_t540" translatable="false">Domyos T540</string>
     <string name="devicetype_even_realities_g1" translatable="false">Even Realities G1</string>
     <string name="devicetype_laxasfit" translatable="false">LaxasFit</string>
@@ -2160,8 +2224,11 @@
     <string name="devicetype_soundcore_liberty4_nc" translatable="false">Soundcore Liberty 4 NC</string>
     <string name="devicetype_soundcore_motion300" translatable="false">Soundcore Motion 300</string>
     <string name="devicetype_soundcore_q30" translatable="false">Soundcore Q30</string>
+    <string name="devicetype_soundcore_life_tune" translatable="false">Soundcore Life Tune</string>
+    <string name="devicetype_soundcore_life_tune_xr" translatable="false">Soundcore Life Tune XR</string>
     <string name="devicetype_soundcore_aerofit2" translatable="false">Soundcore AeroFit 2</string>
     <string name="devicetype_soundcore_sport_x20" translatable="false">Soundcore Sport X20</string>
+    <string name="devicetype_haylou_s35_anc" translatable="false">Haylou S35 ANC</string>
     <string name="devicetype_pixel_buds_a_series" translatable="false">Pixel Buds A-Series</string>
     <string name="devicetype_moondrop_space_travel" translatable="false">Moondrop Space Travel</string>
     <string name="devicetype_moondrop_space_travel_2" translatable="false">Moondrop Space Travel 2</string>
@@ -2172,11 +2239,16 @@
     <string name="devicetype_honor_band5" translatable="false">Honor Band 5</string>
     <string name="devicetype_honor_band6" translatable="false">Honor Band 6</string>
     <string name="devicetype_honor_band7" translatable="false">Honor Band 7</string>
+    <string name="devicetype_honor_band9" translatable="false">Honor Band 9</string>
+    <string name="devicetype_honor_band10" translatable="false">Honor Band 10</string>
     <string name="devicetype_honor_magicwatch" translatable="false">Honor Magic Watch</string>
     <string name="devicetype_honor_magicwatch2" translatable="false">Honor MagicWatch 2</string>
     <string name="devicetype_honor_watchgs3" translatable="false">Honor Watch GS 3</string>
     <string name="devicetype_honor_watchgspro" translatable="false">Honor Watch GS Pro</string>
     <string name="devicetype_honor_watch4" translatable="false">Honor Watch 4 (Pro)</string>
+    <string name="devicetype_honor_watch5" translatable="false">Honor Watch 5</string>
+    <string name="devicetype_honor_watch5_pro" translatable="false">Honor Watch 5 Pro</string>
+    <string name="devicetype_honor_watch6" translatable="false">Honor Watch 6</string>
     <string name="devicetype_huawei_band_aw70" translatable="false">Huawei Band (AW70)</string>
     <string name="devicetype_huawei_band6" translatable="false">Huawei Band 6</string>
     <string name="devicetype_huawei_band7" translatable="false">Huawei Band 7</string>
@@ -2212,6 +2284,7 @@
     <string name="devicetype_huawei_watch4pro" translatable="false">Huawei Watch 4 (Pro)</string>
     <string name="devicetype_huawei_watch5" translatable="false">Huawei Watch 5</string>
     <string name="devicetype_huawei_freearc" translatable="false">Huawei FreeArc</string>
+    <string name="devicetype_huawei_freeclip_2" translatable="false">Huawei FreeClip 2</string>
     <string name="devicetype_huawei_freebuds_5i" translatable="false">Huawei FreeBuds 5i</string>
     <string name="devicetype_huawei_freebuds_pro" translatable="false">Huawei FreeBuds Pro</string>
     <string name="devicetype_huawei_freebuds_6" translatable="false">Huawei FreeBuds 6</string>
@@ -2233,6 +2306,7 @@
     <string name="devicetype_redmi_smart_band_pro" translatable="false">Redmi Smart Band Pro</string>
     <string name="devicetype_redmi_watch_4" translatable="false">Redmi Watch 4</string>
     <string name="devicetype_redmi_watch_5" translatable="false">Redmi Watch 5</string>
+    <string name="devicetype_redmi_watch_6" translatable="false">Redmi Watch 6</string>
     <string name="devicetype_redmi_watch_5_active" translatable="false">Redmi Watch 5 Active</string>
     <string name="devicetype_redmi_watch_5_lite" translatable="false">Redmi Watch 5 Lite</string>
     <string name="devicetype_redmi_watch_move" translatable="false">Redmi Watch Move</string>
@@ -2261,6 +2335,7 @@
     <string name="devicetype_blackview_r60" translatable="false">Blackview R60</string>
     <string name="devicetype_misirun_c17" translatable="false">Misirun C17</string>
     <string name="devicetype_c20" translatable="false">C20</string>
+    <string name="devicetype_l70" translatable="false">L 70</string>
     <string name="devicetype_kt80" translatable="false">KT80</string>
     <string name="devicetype_hc96" translatable="false">HC96</string>
     <string name="devicetype_ksix_venture" translatable="false">KSIX Venture</string>
@@ -2273,14 +2348,17 @@
     <string name="devicetype_bandw_pseries" translatable="false">Bowers and Wilkins P series</string>
     <string name="devicetype_earfun_air_s" translatable="false">EarFun Air S</string>
     <string name="devicetype_earfun_air_pro_4" translatable="false">EarFun Air Pro 4</string>
+    <string name="devicetype_earfun_free_pro_3" translatable="false">EarFun Free Pro 3</string>
     <string name="devicetype_atc_ble_oepl" translatable="false">ATC_BLE_OEPL</string>
     <string name="devicetype_igpsport_bsc200" translatable="false">iGPSPORT BSC200</string>
     <string name="devicetype_igpsport_bsc200s" translatable="false">iGPSPORT BSC200S</string>
     <string name="devicetype_igpsport_bsc300" translatable="false">iGPSPORT BSC300</string>
+    <string name="devicetype_igpsport_bsc500" translatable="false">iGPSPORT BSC500</string>
     <string name="devicetype_igpsport_igs630" translatable="false">iGPSPORT iGS630</string>
     <string name="devicetype_igpsport_igs630s" translatable="false">iGPSPORT iGS630S</string>
     <string name="devicetype_igpsport_igs800" translatable="false">iGPSPORT iGS800</string>
     <string name="devicetype_igpsport_binavi_air" translatable="false">iGPSPORT BiNavi Air</string>
+    <string name="devicetype_igpsport_binavi" translatable="false">iGPSPORT BiNavi</string>
     <string name="task_installing_route">Installing route</string>
     <string name="route_upload_completed">Route upload completed</string>
     <string name="route_upload_failed">Route upload failed</string>
@@ -2362,6 +2440,7 @@
     <string name="menuitem_cycles">Cycle Tracking</string>
     <string name="menuitem_alarm">Alarm</string>
     <string name="menuitem_zepp_os_ask_anything_chat_bot">Ask Anything</string>
+    <string name="menuitem_zepp_os_wake_hybridcharge">Wake HybridCharge</string>
     <string name="menuitem_timer">Countdown</string>
     <string name="menuitem_compass">Compass</string>
     <string name="menuitem_settings">Settings</string>
@@ -2391,6 +2470,8 @@
     <string name="menuitem_alexa">Alexa</string>
     <string name="menuitem_zepp_flow">Zepp Flow</string>
     <string name="menuitem_jet_lag_manager">Jet Lag Manager</string>
+    <string name="menuitem_training_calendar">Training Calendar</string>
+    <string name="menuitem_intervals_icu" translatable="false">Intervals.icu</string>
     <string name="menuitem_dnd">DND</string>
     <string name="menuitem_stopwatch">Stopwatch</string>
     <string name="menuitem_goal">Activity Goal</string>
@@ -2665,6 +2746,7 @@
     <string name="permission_notification_policy_access">%1$s needs access to Do Not Disturb settings in order to honor them on your watch when your phone\'s screen is off.\n\nPlease tap \"%2$s\" then \"%1$s\" and enable \"Allow Do Not Disturb\", then tap \"Back\" to return to %1$s.</string>
     <string name="permission_location">%1$s needs access to your location in the background to allow it to stay connected to your watch even when your screen is off.\n\nPlease choose \"%2$s\" in the following screen, then tap \"Back\" to return to %1$s.</string>
     <string name="permission_display_over_other_apps">%1$s needs permission to display over other apps in order to let Bangle.js watches start activities via intents when %1$s is in the background.\n\nThis can be used to start a music app and play a song, and many other things.\n\nPlease tap \"%2$s\" then \"%1$s\" and enable \"Allow display over other apps\", then tap \"Back\" to return to %1$s.\n\nTo stop %1$s asking for permissions go to \"Settings\" and uncheck \"Check permission status\".\n\nMake sure to grant %1$s the permissions needed to function as you expect.</string>
+    <string name="permission_navigation_comaps">%1$s needs permission to read CoMaps navigation data. Please tap \"%2$s\" to be directed to system app settings and enable the permission, then return here to toggle the option again.</string>
     <string name="error_version_check_extreme_caution">CAUTION: Error when checking version information! You should not continue! Saw version name \"%s\"</string>
     <string name="require_location_provider">Location must be enabled</string>
     <string name="companiondevice_pairing">CompanionDevice Pairing</string>
@@ -2730,7 +2812,7 @@
     <string name="electrical_current">Current</string>
     <string name="mountain_bike_grit_score">Grit score</string>
     <string name="mountain_bike_flow_score">Flow score</string>
-    <string name="caloriesBurnt">Calories</string>
+    <string name="caloriesBurnt">Total calories</string>
     <string name="restingCalories">Resting Calories</string>
     <string name="metabolic_rate">Metabolic Rate</string>
     <string name="active_calories_avg">Active AVG</string>
@@ -2817,6 +2899,13 @@
     <string name="lactateThresholdHeartRate">Lactate Threshold Heart Rate</string>
     <string name="recoveryTime">Recovery Time</string>
     <string name="recoveryHr">Recovery Heart Rate</string>
+    <string name="workout_throws_count">Throws</string>
+    <string name="workout_throws_low">Low Intensity Throws</string>
+    <string name="workout_throws_medium">Medium Intensity Throws</string>
+    <string name="workout_throws_high">High Intensity Throws</string>
+    <string name="workout_distance_goal">Distance Goal</string>
+    <string name="workout_distance_goal_percent">Distance Goal Reached</string>
+    <string name="workout_distance_meters_calibrated">Calibrated Distance</string>
     <string name="ratingOfPerceivedExertion">Rate of Perceived Exertion</string>
     <string name="averageStride">Average Stride</string>
     <string name="maxStride">Max Stride</string>
@@ -2917,6 +3006,7 @@
     <string name="unit_revolutions_per_minute">revs/min</string>
     <string name="unit_rpm">rpm</string>
     <string name="unit_millimeter">mm</string>
+    <string name="unit_inch">in</string>
     <string name="unit_watt">Watt</string>
     <string name="unit_joule">Joule</string>
     <string name="unit_ampere">A</string>
@@ -2961,6 +3051,8 @@
     <string name="ground_contact_time_balance">Ground Contact Time Balance</string>
     <string name="running_step_speed_loss">Step Speed Loss</string>
     <string name="running_step_speed_loss_percentage">Step Speed Loss %</string>
+    <string name="stance_time_percent">Stance Time %</string>
+    <string name="performance_condition">Performance Condition</string>
     <string name="workout_repetitions">Repetitions</string>
     <string name="workout_revolutions">Revolutions</string>
     <string name="workout_swings">Swings</string>
@@ -2981,6 +3073,7 @@
     <string name="degrees">degrees</string>
     <string name="minutes_100m">min/100m</string>
     <string name="minutes_100yd">min/100yd</string>
+    <string name="minutes_500m">min/500m</string>
     <string name="Pace">Pace</string>
     <!-- activity summary groups-->
     <string name="Strokes">Strokes</string>
@@ -3002,6 +3095,8 @@
     <string name="activity_detail_duration_label">Duration</string>
     <string name="activity_detail_show_gps_label">Show GPS Track</string>
     <string name="activity_detail_share_gps_label">Share GPS Track</string>
+    <string name="activity_detail_export_fit">Share FIT File</string>
+    <string name="activity_detail_export_fit_failed">Failed to export FIT file</string>
     <string name="activity_detail_inspect_file">Inspect file</string>
     <string name="activity_detail_share_raw_summary">Share Raw Summary</string>
     <string name="activity_detail_share_raw_details">Share Raw Details</string>
@@ -3368,6 +3463,7 @@
     <string name="body_energy">Body Energy</string>
     <string name="vo2max_running">Running VO₂ Max</string>
     <string name="vo2max_cycling">Cycling VO₂ Max</string>
+    <string name="six_months">6 Months</string>
     <string name="thirty_days_timeline">30 Days Timeline</string>
     <string name="pref_header_sony_ambient_sound_control">Ambient Sound Control</string>
     <string name="pref_header_sony_sound_control">Sound Control</string>
@@ -3455,6 +3551,8 @@
     <string name="sony_surround_mode_concert_hall">Concert Hall</string>
     <string name="sony_warn_sbc_codec">Warning: The equalizer, audio position and surround settings only work for the SBC audio codec.</string>
     <string name="sony_equalizer">Equalizer</string>
+    <string name="sony_equalizer_bluetooth">Equalizer (Bluetooth)</string>
+    <string name="sony_equalizer_mp3">Equalizer (MP3)</string>
     <string name="sony_anc_optimizer_status_starting">Starting…</string>
     <string name="sony_anc_optimizer_status_not_running">Not Running</string>
     <string name="sony_anc_optimizer_status_wearing_condition">Measuring wearing condition…</string>
@@ -3496,6 +3594,10 @@
     <string name="pref_adaptive_volume_control_title">Adaptive volume control</string>
     <string name="pref_adaptive_noise_cancelling_title">Adaptive ANC</string>
     <string name="pref_adaptive_noise_cancelling_summary">Set the strength of the ANC automatically depending on the ambient sound level</string>
+    <string name="sony_capture_voice_during_call">Capture voice during call</string>
+    <string name="sony_capture_voice_during_call_summary">Your own voice will be easier to hear during calls. If your voice sounds too loud or background noise is distracting, please turn off this feature.</string>
+    <string name="sony_service_link">Service link</string>
+    <string name="sony_service_link_summary">Allow integration with other services, including Spotify and Endel</string>
     <!--    <string name="pref_personalized_noise_cancelling_title">Personalized ANC</string>-->
     <!--    <string name="pref_personalized_noise_cancelling_summary">Set whether to use personalized active noise-cancelling</string>-->
     <string name="sony_speak_to_chat">Speak-to-chat</string>
@@ -3513,6 +3615,7 @@
     <string name="sony_speak_to_chat_timeout_long">Long (1m)</string>
     <string name="sony_connect_two_devices">Connect to 2 devices simultaneously</string>
     <string name="sony_notification_voice_guide">Notifications &amp; Voice Guide</string>
+    <string name="sony_voice_notifications_volume">Voice Guide Volume</string>
     <string name="sony_automatic_power_off">Automatic Power Off</string>
     <string name="sony_automatic_power_off_off">Do not turn off</string>
     <string name="sony_automatic_power_off_5_min">5 minutes</string>
@@ -3536,6 +3639,8 @@
     <string name="sony_ambient_sound_control_button_mode_as_off">Ambient Sound, Off</string>
     <string name="sony_quick_access_double_tap">Quick Access (Double Tap)</string>
     <string name="sony_quick_access_triple_tap">Quick Access (Triple Tap)</string>
+    <string name="sony_voice_assistant_function">Voice Assistant Function</string>
+    <string name="sony_voice_assistant_mobile_device">Voice Assistant (Mobile Device)</string>
     <string name="sony_protocol_v1">Version 1</string>
     <string name="sony_protocol_v2">Version 2</string>
     <string name="sony_protocol_v3">Version 3</string>
@@ -3601,6 +3706,8 @@
     <string name="soundcore_gaming_mode_summary">Reduce Latency and enhance sounds of footsteps and voices. May reduce connection stability.</string>
     <string name="soundcore_adaptive_direction_title">Adaptive Direction</string>
     <string name="soundcore_adaptive_direction_summary">Adjust equalizer preset automatically based on device direction</string>
+    <string name="haylou_s35_anc_eq_classic">Classic</string>
+    <string name="haylou_s35_anc_eq_bass">Bass</string>
     <string name="soundcore_equalizer_preset">Preset</string>
     <string name="soundcore_equalizer_preset_signature">soundcore Signature</string>
     <string name="soundcore_equalizer_preset_xtra_bass">Xtra Bass</string>
@@ -3708,14 +3815,6 @@
     <string name="pref_device_action_dnd_priority">Do not disturb - Priority only</string>
     <string name="pref_device_action_dnd_alarms">Do not disturb - Alarms only</string>
     <string name="pref_device_action_dnd_on">Do not disturb - On</string>
-    <!-- Translators: the ### indicate number of digits, keep intact -->
-    <string name="distance_format_meters">###m</string>
-    <!-- Translators: the ### indicate number of digits, keep intact -->
-    <string name="distance_format_kilometers">###.#km</string>
-    <!-- Translators: the ### indicate number of digits, keep intact -->
-    <string name="distance_format_miles">###.#mi</string>
-    <!-- Translators: the ### indicate number of digits, keep intact -->
-    <string name="distance_format_feet">###ft</string>
 
     <string name="idasen_control_button_mid">MID</string>
     <string name="idasen_control_button_sit">SIT</string>
@@ -3864,6 +3963,53 @@
     <string name="pref_title_debug">Debug request</string>
     <string name="devicetype_asteroidos" translatable="false">AsteroidOS</string>
     <string name="devicetype_soflow_s06" translatable="false">SoFlow SO6</string>
+    <string name="devicetype_xiaomi_scooter_5_max" translatable="false">Xiaomi Scooter 5 Max</string>
+    <string name="scooter_lock_motor_title">Lock motor</string>
+    <string name="scooter_lock_motor_summary">After 24h, the scooter will automatically turn off and won\'t remain locked when it is off. This function cannot protect the scooter from being stolen.</string>
+    <string name="xiaomi_scooter_category_assisted_driving">Assisted driving</string>
+    <string name="category_info">Info</string>
+    <string name="xiaomi_scooter_ride_mode">Ride mode</string>
+    <string name="xiaomi_scooter_ride_mode_standard">Standard</string>
+    <string name="xiaomi_scooter_ride_mode_sport">Sport</string>
+    <string name="xiaomi_scooter_ride_mode_walk">Walk</string>
+    <string name="xiaomi_scooter_taillight_always_on">Tail light always on</string>
+    <string name="xiaomi_scooter_auto_lights_title">Auto lights</string>
+    <string name="xiaomi_scooter_auto_lights_summary">Turn on the front and tail light automatically, depending on the ambient light. If the lights are adjusted manually, the feature will be temporarily disabled until the scooter is turned off and on again.</string>
+    <string name="xiaomi_scooter_ambient_light_title">Ambient light</string>
+    <string name="xiaomi_scooter_ambient_light_summary">Turn on ambient light with the front and tail light.</string>
+    <string name="xiaomi_scooter_smart_energy_recovery_title">Smart energy recovery</string>
+    <string name="xiaomi_scooter_smart_energy_recovery_summary">When the scooter is moving on a slope, automatically adjusts the energy recovery intensity to "low". After leaving the slope, it will be automatically restored to the previous setting.</string>
+    <string name="xiaomi_scooter_slope_parking_title">Slope parking</string>
+    <string name="xiaomi_scooter_slope_parking_summary">When stopping on a slope, squeeze the brake for 3s to lock the motor. Press the accelerator to unlock the motor.</string>
+    <string name="xiaomi_scooter_tcs_anti_slip_title">Traction Control System</string>
+    <string name="xiaomi_scooter_tcs_anti_slip_summary">Prevent the wheel from slipping, especially on slippery surfaces.</string>
+    <string name="xiaomi_scooter_energy_recovery_level">Energy recovery level</string>
+    <string name="xiaomi_scooter_energy_recovery_low">Low</string>
+    <string name="xiaomi_scooter_energy_recovery_medium">Medium</string>
+    <string name="xiaomi_scooter_energy_recovery_high">High</string>
+    <string name="xiaomi_scooter_voltage">Voltage</string>
+    <string name="xiaomi_scooter_power">Power</string>
+    <string name="xiaomi_scooter_battery_temp">Battery temperature</string>
+    <string name="xiaomi_scooter_scooter_temp">Scooter temperature</string>
+    <string name="xiaomi_scooter_battery_cycles">Battery cycles</string>
+    <string name="xiaomi_scooter_battery_mfg_date">Battery manufacture date</string>
+    <string name="xiaomi_scooter_battery_serial">Battery serial number</string>
+    <string name="xiaomi_scooter_bms_fw_version">BMS firmware version</string>
+    <string name="xiaomi_scooter_keep_bluetooth_on_title">Bluetooth always on</string>
+    <string name="xiaomi_scooter_keep_bluetooth_on_summary">Allows to find scooter while turned off. Increases power usage. This function is automatically disabled if battery is under 10%. If the scooter is not used for a long time, please disable this function.
+</string>
+    <string name="xiaomi_scooter_tire_pressure_title">Tire pressure maintenance</string>
+    <string name="xiaomi_scooter_tire_pressure_enabled_title">Reminder enabled</string>
+    <string name="xiaomi_scooter_tire_pressure_enabled_summary">Display an icon on the scooter\'s control panel to remind of tire pressure maintenance.</string>
+    <string name="xiaomi_scooter_tire_pressure_interval_title">Reminder interval</string>
+    <string name="xiaomi_scooter_tire_pressure_interval_14">14 days</string>
+    <string name="xiaomi_scooter_tire_pressure_interval_30">30 days</string>
+    <string name="xiaomi_scooter_tire_pressure_interval_60">60 days</string>
+    <string name="xiaomi_scooter_tire_pressure_interval_180">180 days</string>
+    <string name="xiaomi_scooter_tire_pressure_remaining_title">Days remaining</string>
+    <string name="xiaomi_scooter_tire_pressure_reset_title">Reset reminder</string>
+    <string name="xiaomi_scooter_tire_pressure_reset_summary">Click this button to restart the tire pressure maintenance timer.</string>
+    <string name="xiaomi_scooter_tire_pressure_reset_confirmation">Reset the tire pressure maintenance reminder?</string>
     <string name="pref_title_lock_unlock">Lock</string>
     <string name="wifi_hotspot">Wi-Fi Hotspot</string>
     <string name="wifi_hotspot_summary">Control the Wi-Fi hotspot on the watch</string>
@@ -3957,6 +4103,7 @@
     <string name="info_menu_structure_contents">Menu structure: %s</string>
     <string name="info_fossil_rebuild_watchface_custom_menu">Please rebuild your watchface for custom menu</string>
     <string name="devicetype_miband2_hrx" translatable="false">Mi Band HRX</string>
+    <string name="devicetype_p22b1" translatable="false">P22B1</string>
 
     <string name="prefs_home_icon_left_item">Left</string>
     <string name="prefs_home_icon_center_item">Center</string>
@@ -3972,6 +4119,12 @@
 
     <string name="dual_device_mode_title">Dual device mode</string>
     <string name="dual_device_mode_summary">Allow connecting headphones to two devices simultaneously</string>
+
+    <string name="pref_soundcore_fit_test_title">Fit test</string>
+    <string name="pref_soundcore_fit_test_summary">Evaluate noise cancelling effectiveness. Perform in a quiet place.</string>
+    <string name="pref_soundcore_fit_test_result">Fit test – Left: %1$s, Right: %2$s</string>
+    <string name="pref_soundcore_fit_test_excellent_seal">Excellent seal</string>
+    <string name="pref_soundcore_fit_test_poor_seal">Adjust or try a different ear tip</string>
 
     <string name="prefs_wena3_title_screen">Display Settings</string>
     <string name="prefs_wena3_title_activity">Activity Settings</string>
@@ -4062,6 +4215,7 @@
     <string name="pref_title_navigation_apps">Navigation apps</string>
     <string name="pref_navigation_app_osmand">OsmAnd(+)</string>
     <string name="pref_navigation_app_gmaps">Google Maps</string>
+    <string name="pref_navigation_app_comaps">CoMaps</string>
     <string name="serial_number">Serial Number</string>
     <string name="menuitem_stats">Stats</string>
     <string name="menuitem_running">Running</string>
@@ -4091,6 +4245,7 @@
     <string name="pref_vitality_score_daily_title">Daily progress</string>
     <string name="pref_vitality_score_daily_summary">Get a notification when you reached the maximum number of vitality points for the day</string>
     <string name="widget">Widget</string>
+    <string name="add_widget_screen">Add widget screen</string>
     <string name="widget_screen">Widget Screen</string>
     <string name="widget_screen_delete_confirm_title">Delete widget screen</string>
     <string name="widget_screen_delete_confirm_description">Are you sure you want to delete \"%1$s\"?</string>
@@ -4235,8 +4390,11 @@
     <string name="pref_sleepasandroid_feat_notifications">Notifications</string>
     <string name="pref_sleepasandroid_feat_movement">Accelerometer</string>
     <string name="pref_sleepasandroid_feat_heartrate">Heart rate</string>
+    <string name="pref_sleepasandroid_feat_heart_rr_intervals">R-R Intervals</string>
     <string name="pref_sleepasandroid_feat_oximetry">Oximetry</string>
-    <string name="pref_sleepasandroid_feat_spo2">SPO2</string>
+    <string name="pref_sleepasandroid_feat_spo2_autofetch_only_summary">This device only provides SpO2 via periodic auto-fetch, not live readings</string>
+    <string name="pref_sleepasandroid_spo2_autofetch">SpO2 Auto-fetch Settings</string>
+    <string name="pref_sleepasandroid_spo2_autofetch_interval">Fetch interval (seconds)</string>
     <string name="pref_title_huawei_account">Huawei Account</string>
     <string name="pref_summary_huawei_account">Huawei account used in pairing process. Setting it allows to pair without factory reset.</string>
     <string name="watchface_resolution_doesnt_match">Watchface resolution doesn\'t match device screen. Watchface is %1$s device screen is %2$s</string>
@@ -4306,6 +4464,8 @@
     <string name="cannot_upload_watchface_too_many_watchfaces_installed">Cannot upload watchface, too many watchfaces installed</string>
     <string name="insufficient_space_for_upload">Insufficient space for upload</string>
     <string name="file_already_exists">File already exists</string>
+    <string name="huawei_app_install_failed">The watch refused to install the app</string>
+    <string name="huawei_app_uninstall_failed">The watch could not remove the app</string>
     <string name="smart_ring_measurement_error_worn_incorrectly">Measurement error. Are the ring\'s sensors oriented correctly?</string>
     <string name="smart_ring_measurement_error_unknown">Unknown measurement error %d received from ring</string>
     <string name="pref_header_deprecated_functionalities">Deprecated functionalities</string>
@@ -4563,6 +4723,10 @@
     <string name="huawei_voice_boost">Voice Boost</string>
     <string name="huawei_better_audio_quality_title">Prioritise better audio quality.</string>
     <string name="huawei_better_audio_quality_summary">Enable better audio codecs (LDAC). This should improve sound quality, but it increases power consumption and can cause delays.</string>
+    <string name="huawei_adaptive_volume_title">Adaptive Volume</string>
+    <string name="huawei_adaptive_volume_summary">Automatically adjust volume based on your environment. (Increases power usage)</string>
+    <string name="huawei_extra_media_volume_title">Extra media volume</string>
+    <string name="huawei_extra_media_volume_summary">Increase the maximum media volume. This may affect audio quality. May damage hearing.</string>
     <string name="maps">Maps</string>
     <string name="workout_charts">Workout Charts</string>
     <string name="maps_settings">Maps settings</string>
@@ -4661,6 +4825,8 @@
     <string name="single_click">Single click</string>
     <string name="switch_to_phone">Switch to %1$s</string>
     <string name="wifi_channel">Wi-Fi Channel</string>
+    <string name="wifi_channel_2_4_ghz">Wi-Fi Channel (2.4 GHz)</string>
+    <string name="wifi_channel_5_ghz">Wi-Fi Channel (5 GHz)</string>
     <string name="wifi_frequency_2_4_ghz">2.4 GHz</string>
     <string name="wifi_frequency_5_ghz">5 GHz</string>
     <string name="wifi_frequency">Wi-Fi Frequency</string>
@@ -4681,11 +4847,15 @@
     <string name="service_notification_collector_service_title">Gadgetbridge Notification Monitor</string>
     <string name="service_notification_collector_service_text">Monitoring notifications in background</string>
     <string name="devicetype_imiki_frame_2" translatable="false">IMIKI Frame 2</string>
+    <string name="devicetype_ollee_watch_one" translatable="false">Ollee Watch One</string>
     <string name="devicetype_oukitel_bt103" translatable="false">Oukitel BT103</string>
+    <string name="devicetype_una_watch" translatable="false">UNA Watch</string>
+    <string name="devicetype_dm58" translatable="false">DM58</string>
     <string name="devicetype_y6" translatable="false">Y6</string>
     <string name="devicetype_y66" translatable="false">Y66</string>
     <string name="devicetype_d3" translatable="false">D3</string>
     <string name="devicetype_s52" translatable="false">S52</string>
+    <string name="devicetype_kieslect_calling_smartwatch_kr_pro" translatable="false">Kieslect Calling Smartwatch Kr Pro</string>
     <string name="devicetype_r1" translatable="false">R1</string>
     <string name="devicetype_haylou_watch_2_pro" translatable="false">Haylou Watch 2 Pro</string>
     <string name="devicetype_dotn_p66d" translatable="false">Dotn P66D</string>
@@ -4710,6 +4880,7 @@
     <string name="devicetype_shokz_openswim_pro" translatable="false">Shokz OpenSwim Pro</string>
     <string name="devicetype_battery_monitor" translatable="false">Battery Monitor</string>
     <string name="devicetype_victron_smartshunt" translatable="false">Victron SmartShunt</string>
+    <string name="devicetype_dji_osmo_action_4" translatable="false">DJI Osmo Action 4</string>
     <string name="devicetype_sinilink" translatable="false">Sinilink</string>
     <string name="devicetype_onetouch" translatable="false">OneTouch Glucose Meter</string>
     <string name="equalizer_preset_standard">Standard</string>
@@ -4751,6 +4922,8 @@
     <string name="huawei_send_gps_and_time_title">Send GPS and Time to device</string>
     <string name="huawei_send_gps_and_time_summary">Send GPS and Time to device for weather and search stars optimization. Location should be set in the settings</string>
     <string name="garmin_mlr_protocol">Multi-Link Reliable Protocol</string>
+    <string name="feature_exploresync_title">ExploreSync Protocol</string>
+    <string name="feature_exploresync_summary">Sync activity GPS tracks using the ExploreSync protocol. Should only be used if the device does not provide FIT files.</string>
     <string name="feature_experimental_unstable">Experimental, might be unstable</string>
     <string name="heart_rate_settings">Heart rate settings</string>
     <string name="heart_rate_settings_summary">View current workout heart rate settings and zones</string>
@@ -4837,6 +5010,17 @@
     <string name="notification_pebble_js_service_text">Running Pebble app/watchface JavaScript</string>
     <string name="internet_helper_banglejs_permission_missing_title">Permission missing</string>
     <string name="internet_helper_banglejs_permission_missing_text">Access to the Bangle.js app loader is currently not allowed by your settings. Please go to the internet helper settings in the external integrations settings to enable it.</string>
+    <!-- Generic internet/connectivity error reasons (shared by any feature that needs the network) -->
+    <string name="toast_error_could_not_reach_server">Could not reach %1$s.</string>
+    <string name="toast_error_server_unreachable">Server unreachable</string>
+    <string name="toast_error_could_not_resolve_host">Could not resolve server address. Check the URL and your connection.</string>
+    <string name="toast_error_connection_refused">Connection refused by the server. Check the address and port.</string>
+    <string name="toast_error_connection_timed_out">Connection timed out. The server took too long to respond.</string>
+    <string name="toast_error_tls">Secure connection failed. Check the server certificate.</string>
+    <string name="toast_error_unexpected_response">Unexpected response from server.</string>
+    <string name="internet_helper_error_no_internet_helper">This feature requires the Internet Helper</string>
+    <string name="internet_helper_error_permission">Internet Helper doesn\'t have internet permission</string>
+    <string name="toast_error_invalid_api_key">Invalid API key</string>
     <string name="eco">Eco</string>
     <string name="prefs_title_offgrid_mode">Off-grid mode</string>
     <string name="solar_panel1_peak_w">Solar panel 1 peak W</string>
@@ -4922,6 +5106,7 @@
     <string name="health_connect_finished_with_errors">Health Connect Sync experienced errors, some data will not be available.</string>
     <string name="health_connect_syncing">Syncing…</string>
     <string name="notification_channel_health_connect_sync_name">Health Connect Sync</string>
+    <string name="notification_channel_device_warnings">Device Warnings</string>
     <string name="health_connect_sync_status_title">Sync Status</string>
     <string name="pref_health_connect_detailed_workout_sync_title">Detailed workout sync</string>
     <string name="pref_health_connect_detailed_workout_sync_summary">Sync GPS routes and per-second metrics (heart rate, speed, power) for workouts. Provides richer data but may take longer.</string>
@@ -5021,6 +5206,7 @@
     <string name="no_activity_track_in_activity_toast">No activity track in this activity</string>
     <string name="unable_to_display_gpx_track_toast">Unable to display GPX track: %1$s</string>
     <string name="unable_to_share_gpx_track_toast">Unable to share GPX track: %1$s</string>
+    <string name="endurain_uploading_started">Uploading to Endurain…</string>
     <string name="endurain_successfully_uploaded_toast">Successfully uploaded to Endurain</string>
     <string name="endurain_error_while_uploading_toast">Error while uploading to Endurain</string>
     <string name="endurain_unable_to_upload_gpx_file_toast">Unable to upload activity file to Endurain: %1$s</string>
@@ -5216,4 +5402,108 @@
     <string name="pulse_weather_refresh">Refresh now</string>
     <string name="pulse_weather_refresh_summary">Fetch and send weather to your watch</string>
     <string name="pulse_weather_refreshing">Fetching weather…</string>
+
+    <!-- Workout summary section headers -->
+    <string name="goals">Goals</string>
+    <string name="predictions">Predictions</string>
+    <string name="punches">Punches</string>
+    <string name="Throws">Throws</string>
+
+    <!-- Workout summary field labels (Xiaomi parsers and generic) -->
+    <string name="vitality_gain">Vitality gain</string>
+    <string name="v02maxLevel">VO₂max level</string>
+    <string name="goalCount">Goal count</string>
+    <string name="groupCount">Group count</string>
+    <string name="configuredTimeGoal">Time goal</string>
+    <string name="configuredCaloriesGoal">Calories goal</string>
+    <string name="maximumCaloriesGoal">Max calories goal</string>
+    <string name="configuredPaceGoal">Pace goal</string>
+    <string name="configuredSpeedGoal">Speed goal</string>
+    <string name="configuredCadenceGoal">Cadence goal</string>
+    <string name="time_goal_percent">Time goal reached</string>
+    <string name="calories_goal_percent">Calories goal reached</string>
+    <string name="pace_goal_percent">Pace goal reached</string>
+    <string name="speed_goal_percent">Speed goal reached</string>
+    <string name="cadence_goal_percent">Cadence goal reached</string>
+    <string name="lengths_goal_percent">Lengths goal reached</string>
+    <string name="projectedTime5km">Projected 5 km time</string>
+    <string name="projectedTime10km">Projected 10 km time</string>
+    <string name="projectedTimeHalfMarathon">Projected half-marathon time</string>
+    <string name="projectedTimeMarathon">Projected marathon time</string>
+    <string name="totalPunchCount">Total punches</string>
+    <string name="perfectPunchCount">Perfect punches</string>
+    <string name="goodPunchCount">Good punches</string>
+    <string name="missPunchCount">Missed punches</string>
+
+    <!-- Xiaomi vibration patterns -->
+    <string name="pref_xiaomi_vibration_patterns_title">Vibration patterns</string>
+    <string name="xiaomi_vibration_patterns_empty">No vibration settings found on the device. They are read when the device connects.</string>
+    <string name="xiaomi_vibration_pattern_unnamed">Pattern %1$d</string>
+    <string name="xiaomi_vibration_section_types">Notification types</string>
+    <string name="xiaomi_vibration_section_patterns">Custom patterns</string>
+    <string name="xiaomi_vibration_default">Default</string>
+    <string name="xiaomi_vibration_preset">Built-in %1$d</string>
+    <string name="xiaomi_vibration_type_call">Incoming calls</string>
+    <string name="xiaomi_vibration_type_event">Events</string>
+    <string name="xiaomi_vibration_type_task">Task reminders</string>
+    <string name="xiaomi_vibration_type_alarm">Alarms</string>
+    <string name="xiaomi_vibration_type_notification">Notifications</string>
+    <string name="xiaomi_vibration_type_standing">Standing reminders</string>
+    <string name="xiaomi_vibration_type_sms">SMS</string>
+    <string name="xiaomi_vibration_type_goal">Goal notifications</string>
+    <string name="xiaomi_vibration_type_unknown">Type %1$d</string>
+    <string name="xiaomi_vibration_builtin_good_day">Good Day</string>
+    <string name="xiaomi_vibration_builtin_beeper">Beeper</string>
+    <string name="xiaomi_vibration_builtin_toybox">Toybox</string>
+    <string name="xiaomi_vibration_builtin_iced_latte">Iced latte</string>
+    <string name="xiaomi_vibration_builtin_jump">Jump</string>
+    <string name="xiaomi_vibration_builtin_wave">Wave</string>
+    <string name="xiaomi_vibration_refresh">Refresh from device</string>
+    <string name="xiaomi_vibration_refresh_requested">Requested patterns from device</string>
+    <string name="xiaomi_vibration_add_test">Add vibration</string>
+    <string name="xiaomi_vibration_add_requested">Sent add request to device</string>
+    <string name="xiaomi_vibration_delete_title">Delete vibration pattern</string>
+    <string name="xiaomi_vibration_delete_message">Delete \"%1$s\" from the device?</string>
+    <string name="xiaomi_vibration_add_title">Add vibration pattern</string>
+    <string name="xiaomi_vibration_name_hint">Name</string>
+    <string name="xiaomi_vibration_type_label">Notification type</string>
+    <string name="xiaomi_vibration_segments_label">Segments</string>
+    <string name="xiaomi_vibration_segment_add">Add segment</string>
+    <string name="xiaomi_vibration_segment_on">Vibrate</string>
+    <string name="xiaomi_vibration_segment_ms_hint">Duration (ms)</string>
+    <string name="xiaomi_vibration_segment_strength_hint">Strength (1-100)</string>
+    <string name="xiaomi_vibration_segment_remove">Remove segment</string>
+    <string name="xiaomi_vibration_no_segments">Add at least one segment</string>
+
+    <string name="pref_header_quick_settings">Quick Settings &amp; Device Controls</string>
+    <string name="pref_summary_quick_settings">Configure quick settings tiles and device controls</string>
+    <string name="qs_tile_activity_title">Quick Settings Tiles</string>
+    <string name="qs_tile_not_assigned">Not assigned</string>
+    <string name="qs_tile_slot_number">Tile %1$d</string>
+    <string name="qs_tile_slot_assigned">Tile %1$d: %2$s · %3$s</string>
+    <string name="qs_tile_slot_unassigned">Tile %1$d: Not assigned</string>
+    <string name="qs_tile_device">Device</string>
+    <string name="qs_tile_setting">Setting</string>
+    <string name="qs_tile_no_device_selected">None</string>
+    <string name="qs_tile_no_preferences_supported">This device has no preferences supported by quick settings</string>
+    <string name="qs_tile_not_connected">%s not connected</string>
+    <string name="qs_tile_allow_lockscreen">Allow from lock screen</string>
+    <string name="qs_tile_allow_lockscreen_summary">Toggle this setting without unlocking the device</string>
+    <string name="qs_tile_add_to_quick_settings">Add to Quick Settings</string>
+    <string name="qs_tile_already_in_quick_settings">Tile already in Quick Settings</string>
+    <string name="qs_tile_clear">Clear</string>
+    <string name="qs_tile_cycle_values">Cycle through values</string>
+    <string name="qs_tile_cycle_values_all">All values</string>
+    <string name="qs_tile_label_1">Gadgetbridge 1</string>
+    <string name="qs_tile_label_2">Gadgetbridge 2</string>
+    <string name="qs_tile_label_3">Gadgetbridge 3</string>
+    <string name="qs_tile_label_4">Gadgetbridge 4</string>
+    <string name="qs_tile_label_5">Gadgetbridge 5</string>
+    <string name="qs_tile_label_6">Gadgetbridge 6</string>
+    <string name="qs_tile_label_7">Gadgetbridge 7</string>
+    <string name="qs_tile_label_8">Gadgetbridge 8</string>
+    <string name="qs_tile_label_9">Gadgetbridge 9</string>
+    <string name="qs_tile_label_10">Gadgetbridge 10</string>
+    <string name="activity_summary_set_header_photo_title">Set header photo</string>
+    <string name="activity_summary_remove_header_photo_title">Remove header photo</string>
 </resources>

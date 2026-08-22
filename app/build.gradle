@@ -167,7 +167,13 @@ android {
     sourceSets {
         main {
             java.srcDirs += "build/generated/sources/gbdao"
+            java.srcDirs += "build/generated/sources/fit"
             res.srcDirs += "build/generated/res/changelog"
+        }
+        test {
+            resources {
+                exclude "FIT-test-files-main/**"
+            }
         }
     }
 
@@ -321,13 +327,16 @@ dependencies {
     // Android Health Connect
     implementation libs.guava // This is needed because CameraActivity.java line 41 doesn't have a ListenableFuture package
     implementation libs.androidx.health.connect.client
+    implementation libs.androidx.exifinterface
 }
 
 preBuild.dependsOn(":GBDaoGenerator:genSources")
+preBuild.dependsOn(':FitCodeGenerator:genFit')
 preBuild.dependsOn(tasks.buildGitChangelog)
 
 gradle.beforeProject {
     preBuild.dependsOn(":GBDaoGenerator:genSources")
+    preBuild.dependsOn(':FitCodeGenerator:genFit')
 }
 
 tasks.register('cleanGenerated', Delete) {

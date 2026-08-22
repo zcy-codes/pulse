@@ -36,6 +36,7 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Icon;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
@@ -470,8 +471,7 @@ public class NotificationListener extends NotificationListenerService {
         // Get the app ID that generated this notification. For now only used by pebble color, but may be more useful later.
         notificationSpec.sourceAppId = source;
 
-        // Get the icon of the notification
-        notificationSpec.iconId = notification.icon;
+        populateNotificationIcon(notification, source, notificationSpec);
 
         notificationSpec.type = AppNotificationType.getInstance().get(source);
 
@@ -974,6 +974,35 @@ public class NotificationListener extends NotificationListenerService {
         }
     }
 
+    static void populateNotificationIcon(final Notification notification,
+                                         final String sourcePackage,
+                                         final NotificationSpec notificationSpec) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            final Icon smallIcon = notification.getSmallIcon();
+            if (smallIcon != null) {
+                try {
+                    final int resourceId = smallIcon.getResId();
+                    if (resourceId != 0) {
+                        notificationSpec.iconId = resourceId;
+                        final String resourcePackage = smallIcon.getResPackage();
+                        notificationSpec.iconPackageId = StringUtils.isBlank(resourcePackage)
+                                ? sourcePackage
+                                : resourcePackage;
+                        return;
+                    }
+                } catch (final IllegalStateException e) {
+                    LOG.debug("Notification small icon is not a resource icon");
+                }
+            }
+        }
+
+        //noinspection deprecation
+        notificationSpec.iconId = notification.icon;
+        if (notificationSpec.iconId != 0) {
+            notificationSpec.iconPackageId = sourcePackage;
+        }
+    }
+
     private boolean handleMediaSessionNotification(final StatusBarNotification sbn) {
         final MediaSession.Token token = sbn.getNotification().extras.getParcelable(Notification.EXTRA_MEDIA_SESSION);
         return token != null && handleMediaSessionNotification(token);
@@ -1129,10 +1158,11 @@ public class NotificationListener extends NotificationListenerService {
 
     private void logNotification(StatusBarNotification sbn, boolean posted) {
         LOG.debug(
-                "Notification {} {}: packageName={}, when={}, priority={}, category={}, flags={}",
+                "Notification {} {}: packageName={}, channelId={} when={}, priority={}, category={}, flags={}",
                 sbn.getId(),
                 posted ? "posted" : "removed",
                 sbn.getPackageName(),
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? sbn.getNotification().getChannelId() : "N/A",
                 sbn.getNotification().when,
                 sbn.getNotification().priority,
                 sbn.getNotification().category,
@@ -1165,6 +1195,16 @@ public class NotificationListener extends NotificationListenerService {
         return false;
     }
 
+    private boolean isOtherUser(StatusBarNotification sbn) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (sbn.getPackageName().equals("android")) {
+                return "OTHER_USERS".equals(sbn.getNotification().getChannelId());
+            }
+        }
+
+        return false;
+    }
+
     private boolean shouldIgnoreSource(StatusBarNotification sbn) {
         String source = sbn.getPackageName();
 
@@ -1180,6 +1220,15 @@ public class NotificationListener extends NotificationListenerService {
                 source.equals("com.android.dialer") ||
                 source.equals("com.google.android.dialer") ||
                 source.equals("com.cyanogenmod.eleven")) {
+            if (isOtherUser(sbn)) {
+                final boolean ignoreOtherUsers = prefs.getBoolean("notifications_ignore_other_users", false);
+                if (ignoreOtherUsers) {
+                    LOG.info("Ignoring notification, is from another user");
+                } else {
+                    LOG.debug("Allowing notification from another user");
+                    return false;
+                }
+            }
             LOG.info("Ignoring notification, is a system event");
             return true;
         }
@@ -1188,6 +1237,7 @@ public class NotificationListener extends NotificationListenerService {
                 source.equals("com.android.mms") ||
                 source.equals("com.sonyericsson.conversations") ||
                 source.equals("com.android.messaging") ||
+                source.equals("com.google.android.apps.messaging") ||
                 source.equals("org.smssecure.smssecure") ||
                 source.equals("org.fossify.messages") ||
                 source.equals("com.goodwy.smsmessenger") ||

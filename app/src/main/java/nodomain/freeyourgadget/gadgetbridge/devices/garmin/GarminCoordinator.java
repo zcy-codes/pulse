@@ -83,12 +83,10 @@ import nodomain.freeyourgadget.gadgetbridge.entities.GenericTrainingLoadChronicS
 import nodomain.freeyourgadget.gadgetbridge.entities.GenericTrainingLoadChronicSampleDao;
 import nodomain.freeyourgadget.gadgetbridge.entities.PendingFileDao;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
-import nodomain.freeyourgadget.gadgetbridge.impl.GBDeviceCandidate;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryParser;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityTrackProvider;
 import nodomain.freeyourgadget.gadgetbridge.model.BodyEnergySample;
-import nodomain.freeyourgadget.gadgetbridge.model.DeviceType;
 import nodomain.freeyourgadget.gadgetbridge.model.FitActivityTrackProvider;
 import nodomain.freeyourgadget.gadgetbridge.model.GpxActivityTrackProvider;
 import nodomain.freeyourgadget.gadgetbridge.model.HrvSummarySample;
@@ -112,24 +110,27 @@ public abstract class GarminCoordinator extends AbstractBLEDeviceCoordinator {
     }
 
     @Override
-    public GBDevice createDevice(final GBDeviceCandidate candidate, final DeviceType deviceType) {
-        final GBDevice gbDevice = super.createDevice(candidate, deviceType);
-
+    protected void applyDefaultPreferences(final DevicePrefs devicePreferences, final SharedPreferences.Editor editor) {
         if (defaultNewSyncProtocol()) {
-            final DevicePrefs devicePreferences = GBApplication.getDevicePrefs(gbDevice);
-            final SharedPreferences.Editor editor = devicePreferences.getPreferences().edit();
-
             // #5021 - Some new devices like Venu X1 misses a lot of files without the new sync protocol
             editor.putBoolean("new_sync_protocol", true);
+            // new sync protocol without MLR fails to sync large workouts
+            editor.putBoolean("garmin_mlr", true);
 
             editor.apply();
         }
 
-        return gbDevice;
+        if (defaultExploreSync()) {
+            editor.putBoolean("garmin_exploresync", true);
+        }
     }
 
     public boolean defaultNewSyncProtocol() {
         return false;
+    }
+
+    public boolean defaultExploreSync() {
+        return true;
     }
 
     @Override
@@ -165,7 +166,7 @@ public abstract class GarminCoordinator extends AbstractBLEDeviceCoordinator {
 
     @NonNull
     @Override
-    public Class<? extends DeviceSupport> getDeviceSupportClass(final GBDevice device) {
+    public Class<? extends DeviceSupport> getDeviceSupportClass(@NonNull final GBDevice device) {
         return GarminSupport.class;
     }
 
@@ -326,6 +327,9 @@ public abstract class GarminCoordinator extends AbstractBLEDeviceCoordinator {
         if (supportsAgpsUpdates(device)) {
             location.add(R.xml.devicesettings_garmin_agps);
         }
+
+        final List<Integer> dateTime = deviceSpecificSettings.addRootScreen(DeviceSpecificSettingsScreen.DATE_TIME);
+        dateTime.add(R.xml.devicesettings_time_sync);
 
         final List<Integer> connection = deviceSpecificSettings.addRootScreen(DeviceSpecificSettingsScreen.CONNECTION);
         connection.add(R.xml.devicesettings_high_mtu);

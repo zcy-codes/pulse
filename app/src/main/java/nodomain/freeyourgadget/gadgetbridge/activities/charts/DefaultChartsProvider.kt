@@ -90,10 +90,17 @@ open class DefaultChartsProvider : DeviceChartsProvider {
     override fun getEnabledCharts(device: GBDevice): List<String> {
         val prefs = GBApplication.getDevicePrefs(device)
         val enabledCharts = prefs.getString(DeviceSettingsPreferenceConst.PREFS_DEVICE_CHARTS_TABS, null)
+        val supportedCharts = getSupportedCharts(device)
         return if (!enabledCharts.isNullOrBlank()) {
-            enabledCharts.split(",").intersect(getSupportedCharts(device).toSet()).toList()
+            val enabledSupportedCharts = enabledCharts.split(",").intersect(supportedCharts.toSet()).toList()
+            if (!enabledSupportedCharts.isEmpty()) {
+                enabledSupportedCharts
+            } else {
+                // In case all charts are disabled, to prevent a fully empty charts view
+                supportedCharts
+            }
         } else {
-            getSupportedCharts(device)
+            supportedCharts
         }
     }
 
@@ -140,7 +147,7 @@ open class DefaultChartsProvider : DeviceChartsProvider {
             "heartrate" -> HeartRateCollectionFragment.newInstance(allowSwipe)
             "hrvstatus" -> HrvStatusCollectionFragment.newInstance(allowSwipe)
             "bodyenergy" -> BodyEnergyCollectionFragment.newInstance(allowSwipe)
-            "vo2max" -> VO2MaxFragment()
+            "vo2max" -> VO2MaxCollectionFragment.newInstance(allowSwipe)
             "load" -> LoadFragment()
             "genericmetrics" -> GenericMetricCollectionFragment.newInstance(allowSwipe)
             "stress" -> StressCollectionFragment.newInstance(allowSwipe)

@@ -84,7 +84,7 @@ public class CommunicatorV1 implements ICommunicator {
         if (null == message)
             return;
 
-        final byte[] payload = cobsCoDec.encode(message);
+        final byte[] payload = CobsCoDec.encode(message);
 
         final TransactionBuilder builder = mSupport.createTransactionBuilder(taskName);
         int remainingBytes = payload.length;
@@ -127,5 +127,20 @@ public class CommunicatorV1 implements ICommunicator {
     @Override
     public void onEnableRealtimeSteps(final boolean enable) {
         LOG.error("onEnableRealtimeSteps is not implemented for V1");
+    }
+
+    @Override
+    public void onEnableRealtimeAccelerometer(final boolean enable) {
+        LOG.error("onEnableRealtimeAccelerometer is not implemented for V1");
+    }
+
+    @Override
+    public void onEnableRealtimeSpo2(final boolean enable) {
+        LOG.error("onEnableRealtimeSpo2 is not implemented for V1");
+    }
+
+    @Override
+    public void onEnableRealtimeRrIntervals(final boolean enable) {
+        LOG.error("onEnableRealtimeRrIntervals is not implemented for V1");
     }
 }

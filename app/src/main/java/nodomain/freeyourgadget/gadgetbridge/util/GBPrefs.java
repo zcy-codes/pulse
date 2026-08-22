@@ -91,6 +91,12 @@ public class GBPrefs extends Prefs {
     public static final String AUTO_EXPORT_GPX_ALL_DEVICES = "gpx_auto_export_all_devices";
     public static final String AUTO_EXPORT_GPX_SELECTED_DEVICES = "gpx_auto_export_selected_devices";
 
+    // FIT export
+    public static final String AUTO_EXPORT_FIT_ENABLED = "fit_auto_export_enabled";
+    public static final String AUTO_EXPORT_FIT_DIRECTORY = "fit_auto_export_directory";
+    public static final String AUTO_EXPORT_FIT_ALL_DEVICES = "fit_auto_export_all_devices";
+    public static final String AUTO_EXPORT_FIT_SELECTED_DEVICES = "fit_auto_export_selected_devices";
+
     // Intent API
     public static final String INTENT_API_BROADCAST_EXPORT_DB = "intent_api_broadcast_export";
     public static final String INTENT_API_BROADCAST_EXPORT_ZIP = "intent_api_broadcast_zip_export";
@@ -106,6 +112,8 @@ public class GBPrefs extends Prefs {
     public static final String CHART_MIN_HEART_RATE = "chart_min_heart_rate";
 
     public static final String LAST_DEVICE_ADDRESSES = "last_device_addresses";
+    public static final String LAST_CONNECTED_TS = "last_connected_ts";
+    public static final String SORT_BY_LAST_CONNECTED_TS_KEY = "general_prefs_key_sort_by_last_connected_ts";
     public static final String RECONNECT_ONLY_TO_CONNECTED = "general_reconnectonlytoconnected";
     public static final String BLOCK_SCREENSHOTS = "block_screenshots";
 
@@ -121,6 +129,8 @@ public class GBPrefs extends Prefs {
     public static final String HEALTH_CONNECT_INITIAL_SYNC_START_TS = "health_connect_initial_sync_start_ts";
     public static final String HEALTH_CONNECT_LAST_GRANTED_PERMISSIONS = "health_connect_last_granted_permissions";
     public static final String HEALTH_CONNECT_PROMPT_FOR_FULL_DAO_RESET = "health_connect_prompt_for_full_dao_reset";
+
+    public static final String NAVIGATION_APP_COMAPS = "navigation_app_comaps";
 
     @Deprecated
     public GBPrefs(Prefs prefs) {
@@ -138,6 +148,10 @@ public class GBPrefs extends Prefs {
 
     public boolean getAutoReconnectByScan() {
         return getBoolean(RECONNECT_SCAN_KEY, RECONNECT_SCAN_DEFAULT);
+    }
+
+    public boolean getSortByLastConnectedTs() {
+        return getBoolean(SORT_BY_LAST_CONNECTED_TS_KEY, false);
     }
 
     public boolean getAutoStart() {

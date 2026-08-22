@@ -47,6 +47,8 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_SCREEN_SLEEP_MODE = "pref_screen_sleep_mode";
     public static final String PREF_SCREEN_LIFT_WRIST = "pref_screen_lift_wrist";
     public static final String PREF_SCREEN_PASSWORD = "pref_screen_password";
+    public static final String PREF_PASSWORD = "pref_password";
+    public static final String PREF_PASSWORD_ENABLED = "pref_password_enabled";
     public static final String PREF_SCREEN_GPS = "pref_screen_gps";
     public static final String PREF_SCREEN_ALWAYS_ON_DISPLAY = "pref_screen_always_on_display";
     public static final String PREF_SCREEN_HEARTRATE_MONITORING = "pref_screen_heartrate_monitoring";
@@ -388,6 +390,10 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_HUAWEI_FREEBUDS_ANC_MODE = "pref_freebuds_anc_mode";
     public static final String PREF_HUAWEI_FREEBUDS_VOICE_BOOST = "pref_freebuds_voice_boost";
     public static final String PREF_HUAWEI_FREEBUDS_BETTER_AUDIO_QUALITY = "pref_freebuds_better_audio_quality";
+    public static final String PREF_HUAWEI_FREEBUDS_ADAPTIVE_VOLUME = "pref_freebuds_adaptive_volume_mode";
+    public static final String PREF_HUAWEI_FREEBUDS_ADAPTIVE_VOLUME_APPLIED = "pref_freebuds_adaptive_volume_mode_applied";
+    public static final String PREF_HUAWEI_FREEBUDS_EXTRA_MEDIA_VOLUME = "pref_freebuds_extra_media_volume";
+    public static final String PREF_HUAWEI_FREEBUDS_FIND_HEADPHONES = "pref_freebuds_find_headphones";
 
     public static final String PREF_GALAXY_BUDS_AMBIENT_MODE = "pref_galaxy_buds_ambient_mode";
     public static final String PREF_GALAXY_BUDS_AMBIENT_VOICE_FOCUS = "pref_galaxy_buds_ambient_voice_focus";
@@ -524,7 +530,9 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_SOUNDCORE_BUTTON_BRIGHTNESS = "pref_soundcore_button_brightness";
     public static final String PREF_SOUNDCORE_AUTO_POWER_OFF = "pref_soundcore_auto_power_off";
     public static final String PREF_SOUNDCORE_3D_SURROUND = "pref_soundcore_3d_surround";
+    public static final String PREF_SOUNDCORE_DUAL_CONNECTION = "pref_soundcore_dual_connection";
     public static final String PREF_SOUNDCORE_ENABLE_PAIRING_MODE = "pref_soundcore_enable_pairing_mode";
+    public static final String PREF_SOUNDCORE_FIT_TEST = "pref_soundcore_fit_test";
     public static final String PREF_SOUNDCORE_LDAC_MODE = "pref_soundcore_ldac_mode";
     public static final String PREF_SOUNDCORE_GAMING_MODE = "pref_soundcore_gaming_mode";
     public static final String PREF_SOUNDCORE_ADAPTIVE_DIRECTION = "pref_soundcore_adaptive_direction";
@@ -550,6 +558,13 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_SOUNDCORE_EQUALIZER_BAND8_VALUE = "pref_soundcore_equalizer_band8_value";
     public static final String PREF_SOUNDCORE_EQUALIZER_BAND9_FREQ = "pref_soundcore_equalizer_band9_freq";
     public static final String PREF_SOUNDCORE_EQUALIZER_BAND9_VALUE = "pref_soundcore_equalizer_band9_value";
+
+    public static final String PREF_HAYLOU_S35_ANC_AUDIO_MODE = "pref_haylou_s35_anc_audio_mode";
+    public static final String PREF_HAYLOU_S35_ANC_GAME_MODE = "pref_haylou_s35_anc_game_mode";
+    public static final String PREF_HAYLOU_S35_ANC_LDAC_MODE = "pref_haylou_s35_anc_ldac_mode";
+    public static final String PREF_HAYLOU_S35_ANC_MULTIPOINT = "pref_haylou_s35_anc_multipoint";
+    public static final String PREF_HAYLOU_S35_ANC_EQ_PRESET = "pref_haylou_s35_anc_eq_preset";
+
     public static final String PREF_SONY_AMBIENT_SOUND_CONTROL_BUTTON_MODE = "pref_sony_ambient_sound_control_button_mode";
     public static final String PREF_SONY_FOCUS_VOICE = "pref_sony_focus_voice";
     public static final String PREF_SONY_AMBIENT_SOUND_LEVEL = "pref_sony_ambient_sound_level";
@@ -576,8 +591,10 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_SONY_BUTTON_MODE_RIGHT = "pref_sony_button_mode_right";
     public static final String PREF_SONY_QUICK_ACCESS_DOUBLE_TAP = "pref_sony_quick_access_double_tap";
     public static final String PREF_SONY_QUICK_ACCESS_TRIPLE_TAP = "pref_sony_quick_access_triple_tap";
+    public static final String PREF_SONY_VOICE_ASSISTANT_FUNCTION = "pref_sony_voice_assistant_function";
     public static final String PREF_SONY_AUTOMATIC_POWER_OFF = "pref_sony_automatic_power_off";
     public static final String PREF_SONY_NOTIFICATION_VOICE_GUIDE = "pref_sony_notification_voice_guide";
+    public static final String PREF_SONY_NOTIFICATION_VOICE_GUIDE_VOLUME = "pref_sony_notification_voice_guide_volume";
     public static final String PREF_SONY_SPEAK_TO_CHAT = "pref_sony_speak_to_chat";
     public static final String PREF_SONY_SPEAK_TO_CHAT_SENSITIVITY = "pref_sony_speak_to_chat_sensitivity";
     public static final String PREF_SONY_SPEAK_TO_CHAT_FOCUS_ON_VOICE = "pref_sony_speak_to_chat_focus_on_voice";
@@ -585,6 +602,8 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_SONY_CONNECT_TWO_DEVICES = "pref_sony_connect_two_devices";
     public static final String PREF_SONY_ADAPTIVE_VOLUME_CONTROL = "pref_adaptive_volume_control";
     public static final String PREF_SONY_WIDE_AREA_TAP = "pref_wide_area_tap";
+    public static final String PREF_SONY_CAPTURE_VOICE_DURING_CALL = "pref_sony_capture_voice_during_call";
+    public static final String PREF_SONY_SERVICE_LINK = "pref_sony_service_link";
 
     public static final String PREF_GYMLINK_ENABLED = "gymlink_enabled";
     public static final String PREF_ANTPLUS_ENABLED = "antplus_enabled";
@@ -756,4 +775,29 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_ATC_BLE_OEPL_MODEL = "pref_atc_ble_oepl_model";
     public static final String PREF_ATC_BLE_OEPL_BLE_ADV_INTERVAL = "pref_atc_ble_oepl_ble_adv_interval";
     public static final String PREF_ATC_BLE_OEPL_OEPL_PROTOCOL_ENABLE = "pref_atc_ble_oepl_oepl_protocol_enable";
+
+    public static final String PREF_XIAOMI_SCOOTER_MOTOR_LOCKED = "xiaomi_scooter_motor_locked";
+    public static final String PREF_XIAOMI_SCOOTER_RIDE_MODE = "xiaomi_scooter_ride_mode";
+    public static final String PREF_XIAOMI_SCOOTER_SPEED_UNIT = "xiaomi_scooter_speed_unit";
+    public static final String PREF_XIAOMI_SCOOTER_TAILLIGHT_ALWAYS_ON = "xiaomi_scooter_taillight_always_on";
+    public static final String PREF_XIAOMI_SCOOTER_AUTO_LIGHTS = "xiaomi_scooter_auto_lights";
+    public static final String PREF_XIAOMI_SCOOTER_AMBIENT_LIGHT = "xiaomi_scooter_ambient_light";
+    public static final String PREF_XIAOMI_SCOOTER_SMART_ENERGY_RECOVERY = "xiaomi_scooter_smart_energy_recovery";
+    public static final String PREF_XIAOMI_SCOOTER_SLOPE_PARKING = "xiaomi_scooter_slope_parking";
+    public static final String PREF_XIAOMI_SCOOTER_TCS_ANTI_SLIP = "xiaomi_scooter_tcs_anti_slip";
+    public static final String PREF_XIAOMI_SCOOTER_ENERGY_RECOVERY_INTENSITY = "xiaomi_scooter_energy_recovery_intensity";
+    public static final String PREF_XIAOMI_SCOOTER_VOLTAGE = "xiaomi_scooter_voltage";
+    public static final String PREF_XIAOMI_SCOOTER_CURRENT = "xiaomi_scooter_current";
+    public static final String PREF_XIAOMI_SCOOTER_POWER = "xiaomi_scooter_power";
+    public static final String PREF_XIAOMI_SCOOTER_BATTERY_TEMP = "xiaomi_scooter_battery_temp";
+    public static final String PREF_XIAOMI_SCOOTER_SCOOTER_TEMP = "xiaomi_scooter_scooter_temp";
+    public static final String PREF_XIAOMI_SCOOTER_BATTERY_CYCLES = "xiaomi_scooter_battery_cycles";
+    public static final String PREF_XIAOMI_SCOOTER_BATTERY_MFG_DATE = "xiaomi_scooter_battery_mfg_date";
+    public static final String PREF_XIAOMI_SCOOTER_BATTERY_SERIAL = "xiaomi_scooter_battery_serial";
+    public static final String PREF_XIAOMI_SCOOTER_BMS_FW_VERSION = "xiaomi_scooter_bms_fw_version";
+    public static final String PREF_XIAOMI_SCOOTER_KEEP_BLUETOOTH_ON = "xiaomi_scooter_keep_bluetooth_on";
+    public static final String PREF_XIAOMI_SCOOTER_TIRE_PRESSURE_ENABLED = "xiaomi_scooter_tire_pressure_enabled";
+    public static final String PREF_XIAOMI_SCOOTER_TIRE_PRESSURE_INTERVAL_DAYS = "xiaomi_scooter_tire_pressure_interval_days";
+    public static final String PREF_XIAOMI_SCOOTER_TIRE_PRESSURE_REMAINING_DAYS = "xiaomi_scooter_tire_pressure_remaining_days";
+    public static final String PREF_XIAOMI_SCOOTER_TIRE_PRESSURE_RESET = "xiaomi_scooter_tire_pressure_reset";
 }

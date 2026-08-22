@@ -31,12 +31,15 @@ import android.widget.TextView;
 import androidx.core.content.ContextCompat;
 
 import com.github.mikephil.charting.charts.Chart;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.data.Entry;
 
 import org.apache.commons.lang3.EnumUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -67,6 +70,7 @@ public class CaloriesDailyFragment extends AbstractChartFragment<CaloriesDailyFr
     private LinearLayout caloriesActiveWrapper;
     private TextView caloriesActiveGoal;
     private LinearLayout caloriesActiveGoalWrapper;
+    private LineChart caloriesChart;
     protected int CALORIES_GOAL;
     protected int ACTIVE_CALORIES_GOAL;
     public enum GaugeViewMode {
@@ -117,6 +121,8 @@ public class CaloriesDailyFragment extends AbstractChartFragment<CaloriesDailyFr
         caloriesActiveWrapper = rootView.findViewById(R.id.calories_active_wrapper);
         caloriesActiveGoal = rootView.findViewById(R.id.calories_active_goal);
         caloriesActiveGoalWrapper = rootView.findViewById(R.id.calories_active_goal_wrapper);
+        caloriesChart = rootView.findViewById(R.id.calories_daily_chart);
+        setupCaloriesChart();
         ActivityUser activityUser = new ActivityUser();
         ACTIVE_CALORIES_GOAL = activityUser.getCaloriesBurntGoal();
 
@@ -124,6 +130,7 @@ public class CaloriesDailyFragment extends AbstractChartFragment<CaloriesDailyFr
         if (!supportsActiveCalories()) {
             caloriesActiveWrapper.setVisibility(View.GONE);
             caloriesActiveGoalWrapper.setVisibility(View.GONE);
+            caloriesChart.setVisibility(View.GONE);
         }
 
         if (gaugeViewMode == null) {
@@ -181,9 +188,9 @@ public class CaloriesDailyFragment extends AbstractChartFragment<CaloriesDailyFr
         int startTs = (int) (day.getTimeInMillis() / 1000);
         int endTs = startTs + 24 * 60 * 60 - 1;
         Date date = new Date((long) endTs * 1000);
-        String formattedDate = new SimpleDateFormat("E, MMM dd").format(date);
-        dateView.setText(formattedDate);
+        final String formattedDate = new SimpleDateFormat("E, MMM dd").format(date);
         List<? extends ActivitySample> samples = getActivitySamples(db, device, startTs, endTs);
+        final ActiveCaloriesDailyData activeCaloriesData = createActiveCaloriesDailyData(samples, startTs);
         final Integer restingMetabolicRate;
         if (metricMetabolicResting) {
             MetricSample sample = getLatestMetricSample(db, device, GENERIC_RESTING_METABOLIC_RATE);
@@ -193,10 +200,10 @@ public class CaloriesDailyFragment extends AbstractChartFragment<CaloriesDailyFr
             restingMetabolicRate = (sample == null) ? null : sample.getRestingMetabolicRate();
         }
         if (restingMetabolicRate == null) {
-            return new CaloriesData(0, 0, 0, 0);
+            return new CaloriesData(0, 0, 0, 0, activeCaloriesData.entries, startTs, formattedDate);
         }
         int totalBurnt;
-        int activeBurnt = 0;
+        int activeBurnt = activeCaloriesData.activeCalories;
         boolean sameDay = calendar.get(Calendar.DAY_OF_YEAR) == day.get(Calendar.DAY_OF_YEAR) &&
                 calendar.get(Calendar.YEAR) == day.get(Calendar.YEAR);
         double passedDayProportion = 1;
@@ -205,17 +212,10 @@ public class CaloriesDailyFragment extends AbstractChartFragment<CaloriesDailyFr
         }
         int restingBurnt = (int) (restingMetabolicRate * passedDayProportion);
 
-        for (int i = 0; i <= samples.size() - 1; i++) {
-            ActivitySample sample = samples.get(i);
-            if (sample.getActiveCalories() > 0) {
-                activeBurnt += sample.getActiveCalories();
-            }
-        }
-        // Convert calories to kcal
-        activeBurnt = activeBurnt / 1000;
         totalBurnt = restingBurnt + activeBurnt;
 
-        return new CaloriesData(totalBurnt, activeBurnt, restingBurnt, restingMetabolicRate);
+        return new CaloriesData(totalBurnt, activeBurnt, restingBurnt, restingMetabolicRate,
+                activeCaloriesData.entries, startTs, formattedDate);
     }
 
     @Override
@@ -224,10 +224,13 @@ public class CaloriesDailyFragment extends AbstractChartFragment<CaloriesDailyFr
         int activeCalories = data.activeBurnt;
         int totalCalories = activeCalories + restingCalories;
         final String kcal = getString(R.string.calories_unit);
+        dateView.setText(data.formattedDate);
         caloriesActive.setText(String.format(Locale.getDefault(), "%d %s", activeCalories, kcal));
         metabolicRate.setText(String.format(Locale.getDefault(), "%d %s", data.restingMetabolicRate, kcal));
         caloriesResting.setText(String.format(Locale.getDefault(), "%d %s", restingCalories, kcal));
         caloriesActiveGoal.setText(String.format(Locale.getDefault(), "%d %s", ACTIVE_CALORIES_GOAL, kcal));
+
+        updateCaloriesChart(data);
 
         if (gaugeViewMode.equals(GaugeViewMode.TOTAL_CALORIES_SEGMENT)) {
             int[] colors = new int[] {
@@ -274,23 +277,92 @@ public class CaloriesDailyFragment extends AbstractChartFragment<CaloriesDailyFr
         }
     }
 
+    private void updateCaloriesChart(final CaloriesData data) {
+        final int caloriesColor = ContextCompat.getColor(requireContext(), R.color.calories_color);
+        final float yAxisMaximum = Math.max(
+                Math.max(DailyCumulativeLineChartHelper.maxY(data.activeCaloriesEntries), ACTIVE_CALORIES_GOAL),
+                1f
+        ) * 1.1f;
+
+        DailyCumulativeLineChartHelper.setCumulativeData(
+                caloriesChart,
+                data.activeCaloriesEntries,
+                DailyCumulativeLineChartHelper.timeValueFormatter(data.startTs, "HH:mm"),
+                getString(R.string.active_calories),
+                caloriesColor,
+                GBApplication.getTextColor(requireContext()),
+                ACTIVE_CALORIES_GOAL,
+                yAxisMaximum
+        );
+    }
+
+    static ActiveCaloriesDailyData createActiveCaloriesDailyData(
+            final List<? extends ActivitySample> samples,
+            final int startTs
+    ) {
+        final List<Entry> lineEntries = new ArrayList<>();
+        lineEntries.add(new Entry(0f, 0f));
+
+        int activeCalories = 0;
+        for (final ActivitySample sample : samples) {
+            if (sample.getActiveCalories() > 0) {
+                activeCalories += sample.getActiveCalories();
+            }
+            lineEntries.add(new Entry(sample.getTimestamp() - startTs, activeCalories / 1000));
+        }
+        return new ActiveCaloriesDailyData(activeCalories / 1000, lineEntries);
+    }
+
     @Override
-    protected void renderCharts() {}
+    protected void renderCharts() {
+        caloriesChart.invalidate();
+    }
 
     @Override
     protected void setupLegend(Chart<?> chart) {}
+
+    private void setupCaloriesChart() {
+        DailyCumulativeLineChartHelper.setup(
+                caloriesChart,
+                GBApplication.getSecondaryTextColor(requireContext())
+        );
+    }
+
+    protected static class ActiveCaloriesDailyData {
+        public int activeCalories;
+        public List<Entry> entries;
+
+        protected ActiveCaloriesDailyData(final int activeCalories, final List<Entry> entries) {
+            this.activeCalories = activeCalories;
+            this.entries = entries;
+        }
+    }
 
     protected static class CaloriesData extends ChartsData {
         public int activeBurnt;
         public int restingBurnt;
         public int totalBurnt;
         public int restingMetabolicRate;
+        public List<Entry> activeCaloriesEntries;
+        public int startTs;
+        public final String formattedDate;
 
-        protected CaloriesData(int totalBurnt, int activeBurnt, int restingBurnt, final int restingMetabolicRate) {
+        protected CaloriesData(
+                int totalBurnt,
+                int activeBurnt,
+                int restingBurnt,
+                final int restingMetabolicRate,
+                final List<Entry> activeCaloriesEntries,
+                final int startTs,
+                final String formattedDate
+        ) {
             this.totalBurnt = totalBurnt;
             this.activeBurnt = activeBurnt;
             this.restingBurnt = restingBurnt;
             this.restingMetabolicRate = restingMetabolicRate;
+            this.activeCaloriesEntries = activeCaloriesEntries;
+            this.startTs = startTs;
+            this.formattedDate = formattedDate;
         }
     }
 }

@@ -22,11 +22,13 @@ import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_KMPH;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_METERS;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_METERS_PER_SECOND;
+import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_MILLISECONDS;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_MINUTES_PER_100_METERS;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_MINUTES_PER_KM;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_MM;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_PERCENTAGE;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_SECONDS_PER_100_METERS;
+import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_SECONDS_PER_500_METERS;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_SECONDS_PER_KM;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_SPM;
 import static nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries.UNIT_WATT;
@@ -50,6 +52,7 @@ import java.util.List;
 
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
+import nodomain.freeyourgadget.gadgetbridge.activities.charts.DecimalValueFormatter;
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.SpeedYLabelFormatter;
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.TimestampTranslation;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind;
@@ -81,6 +84,12 @@ public class DefaultWorkoutCharts {
         final List<Entry> stepLengthPoints = new ArrayList<>(initialCapacity);
         final List<Entry> n2LoadPoints = new ArrayList<>(initialCapacity);
         final List<Entry> cnsToxicityPoints = new ArrayList<>(initialCapacity);
+        final List<Entry> verticalOscillationPoints = new ArrayList<>(initialCapacity);
+        final List<Entry> stanceTimePercentPoints = new ArrayList<>(initialCapacity);
+        final List<Entry> stanceTimePoints = new ArrayList<>(initialCapacity);
+        final List<Entry> verticalRatioPoints = new ArrayList<>(initialCapacity);
+        final List<Entry> stanceTimeBalancePoints = new ArrayList<>(initialCapacity);
+        final List<Entry> performanceConditionPoints = new ArrayList<>(initialCapacity);
 
         // some activities / devices provide all points with zero values
         boolean hasSpeedValues = false;
@@ -96,6 +105,12 @@ public class DefaultWorkoutCharts {
         boolean hasStepLengthValues = false;
         boolean hasN2LoadValues = false;
         boolean hasCnsToxicityValues = false;
+        boolean hasVerticalOscillationValues = false;
+        boolean hasStanceTimePercentValues = false;
+        boolean hasStanceTimeValues = false;
+        boolean hasVerticalRatioValues = false;
+        boolean hasStanceTimeBalanceValues = false;
+        boolean hasPerformanceConditionValues = false;
 
         final Accumulator cadenceAccumulator = new Accumulator();
         final Accumulator temperatureAccumulator = new Accumulator();
@@ -200,6 +215,45 @@ public class DefaultWorkoutCharts {
                 n2LoadPoints.add(new Entry(tsShorten, n2Load));
                 hasN2LoadValues = hasN2LoadValues || (n2Load > 0.0f);
             }
+
+            // Running dynamics
+            final float verticalOscillation = point.getVerticalOscillation();
+            if (!Float.isNaN(verticalOscillation)) {
+                verticalOscillationPoints.add(new Entry(tsShorten, verticalOscillation));
+                hasVerticalOscillationValues = hasVerticalOscillationValues || (verticalOscillation > 0.0f);
+            }
+
+            final float stanceTimePercent = point.getStanceTimePercent();
+            if (!Float.isNaN(stanceTimePercent)) {
+                stanceTimePercentPoints.add(new Entry(tsShorten, stanceTimePercent));
+                hasStanceTimePercentValues = hasStanceTimePercentValues || (stanceTimePercent > 0.0f);
+            }
+
+            final float stanceTime = point.getStanceTime();
+            if (!Float.isNaN(stanceTime)) {
+                stanceTimePoints.add(new Entry(tsShorten, stanceTime));
+                hasStanceTimeValues = hasStanceTimeValues || (stanceTime > 0.0f);
+            }
+
+            final float verticalRatio = point.getVerticalRatio();
+            if (!Float.isNaN(verticalRatio)) {
+                verticalRatioPoints.add(new Entry(tsShorten, verticalRatio));
+                hasVerticalRatioValues = hasVerticalRatioValues || (verticalRatio > 0.0f);
+            }
+
+            final float stanceTimeBalance = point.getStanceTimeBalance();
+            if (!Float.isNaN(stanceTimeBalance)) {
+                stanceTimeBalancePoints.add(new Entry(tsShorten, stanceTimeBalance));
+                hasStanceTimeBalanceValues = hasStanceTimeBalanceValues || (stanceTimeBalance > 0.0f);
+            }
+
+            final int performanceCondition = point.getPerformanceCondition();
+            if (performanceCondition > Integer.MIN_VALUE) {
+                // Integer.MIN_VALUE is the no-data sentinel; any other value is a valid
+                // reading, including negative ones (performance condition can be < 0).
+                performanceConditionPoints.add(new Entry(tsShorten, performanceCondition));
+                hasPerformanceConditionValues = true;
+            }
         }
 
         if (!heartRateDataPoints.isEmpty()) {
@@ -258,20 +312,47 @@ public class DefaultWorkoutCharts {
             charts.add(createN2LoadChart(context, n2LoadPoints));
         }
 
+        if (hasVerticalOscillationValues && !verticalOscillationPoints.isEmpty()) {
+            charts.add(createVerticalOscillationChart(context, verticalOscillationPoints));
+        }
+
+        if (hasStanceTimePercentValues && !stanceTimePercentPoints.isEmpty()) {
+            charts.add(createStanceTimePercentChart(context, stanceTimePercentPoints));
+        }
+
+        if (hasStanceTimeValues && !stanceTimePoints.isEmpty()) {
+            charts.add(createStanceTimeChart(context, stanceTimePoints));
+        }
+
+        if (hasVerticalRatioValues && !verticalRatioPoints.isEmpty()) {
+            charts.add(createVerticalRatioChart(context, verticalRatioPoints));
+        }
+
+        if (hasStanceTimeBalanceValues && !stanceTimeBalancePoints.isEmpty()) {
+            charts.add(createStanceTimeBalanceChart(context, stanceTimeBalancePoints));
+        }
+
+        if (hasPerformanceConditionValues && !performanceConditionPoints.isEmpty()) {
+            charts.add(createPerformanceConditionChart(context, performanceConditionPoints));
+        }
+
         return charts;
     }
 
     private static WorkoutChart createElevationChart(final Context context,
                                                      final List<Entry> elevationDataPoints) {
-        final String label = String.format("%s (%s)", context.getString(R.string.Elevation), getUnitString(context, UNIT_METERS));
-        final LineDataSet dataset = createLineDataSet(context, elevationDataPoints, label, ContextCompat.getColor(context, R.color.chart_line_elevation));
+        final WorkoutChartUnits units = chartUnits();
+        final WorkoutChartUnits.Quantity quantity = WorkoutChartUnits.Quantity.ELEVATION;
+        final String unitString = getUnitString(context, units.token(quantity));
+        final String label = String.format("%s (%s)", context.getString(R.string.Elevation), unitString);
+        final LineDataSet dataset = createLineDataSet(context, convertPoints(elevationDataPoints, units, quantity), label, ContextCompat.getColor(context, R.color.chart_line_elevation));
         return new WorkoutChart(
                 "elevation",
                 context.getString(R.string.Elevation),
                 ActivitySummaryEntries.GROUP_ELEVATION,
                 new LineData(dataset),
-                null,
-                getUnitString(context, UNIT_METERS)
+                new DecimalValueFormatter(units.decimals(quantity)),
+                unitString
         );
     }
 
@@ -298,8 +379,22 @@ public class DefaultWorkoutCharts {
     private static WorkoutChart createSpeedChart(final Context context,
                                                  final ActivityKind activityKind,
                                                  final List<Entry> speedDataPoints) {
-        if (ActivityKind.isSwimActivity(activityKind)) {
-            final String label = String.format("%s (%s)", context.getString(R.string.Pace), getUnitString(context, UNIT_MINUTES_PER_100_METERS));
+        final WorkoutChartUnits units = chartUnits(activityKind);
+        if (ActivityKind.isRowingActivity(activityKind)) {
+            final String unitString = getUnitString(context, units.token(WorkoutChartUnits.Quantity.PACE_500M));
+            final String label = String.format("%s (%s)", context.getString(R.string.Pace), unitString);
+            final LineDataSet dataset = createLineDataSet(context, speedDataPoints, label, ContextCompat.getColor(context, R.color.chart_line_speed));
+            return new WorkoutChart(
+                    "pace",
+                    context.getString(R.string.Pace),
+                    ActivitySummaryEntries.GROUP_SPEED,
+                    new LineData(dataset),
+                    new SpeedYLabelFormatter(UNIT_SECONDS_PER_500_METERS),
+                    unitString
+            );
+        } else if (ActivityKind.isSwimActivity(activityKind)) {
+            final String unitString = getUnitString(context, units.token(WorkoutChartUnits.Quantity.PACE_SWIM));
+            final String label = String.format("%s (%s)", context.getString(R.string.Pace), unitString);
             final LineDataSet dataset = createLineDataSet(context, speedDataPoints, label, ContextCompat.getColor(context, R.color.chart_line_speed));
             return new WorkoutChart(
                     "pace",
@@ -307,10 +402,11 @@ public class DefaultWorkoutCharts {
                     ActivitySummaryEntries.GROUP_SPEED,
                     new LineData(dataset),
                     new SpeedYLabelFormatter(UNIT_SECONDS_PER_100_METERS),
-                    getUnitString(context, UNIT_MINUTES_PER_100_METERS)
+                    unitString
             );
         } else if (ActivityKind.isPaceActivity(activityKind)) {
-            final String label = String.format("%s (%s)", context.getString(R.string.Pace), getUnitString(context, UNIT_MINUTES_PER_KM));
+            final String unitString = getUnitString(context, units.token(WorkoutChartUnits.Quantity.PACE));
+            final String label = String.format("%s (%s)", context.getString(R.string.Pace), unitString);
             final LineDataSet dataset = createLineDataSet(context, speedDataPoints, label, ContextCompat.getColor(context, R.color.chart_line_speed));
             return new WorkoutChart(
                     "pace",
@@ -318,18 +414,20 @@ public class DefaultWorkoutCharts {
                     ActivitySummaryEntries.GROUP_SPEED,
                     new LineData(dataset),
                     new SpeedYLabelFormatter(UNIT_SECONDS_PER_KM),
-                    getUnitString(context, UNIT_MINUTES_PER_KM)
+                    unitString
             );
         } else {
-            final String label = String.format("%s (%s)", context.getString(R.string.Speed), getUnitString(context, UNIT_KMPH));
-            final LineDataSet dataset = createLineDataSet(context, speedDataPoints, label, ContextCompat.getColor(context, R.color.chart_line_speed));
+            final WorkoutChartUnits.Quantity quantity = WorkoutChartUnits.Quantity.SPEED;
+            final String unitString = getUnitString(context, units.token(quantity));
+            final String label = String.format("%s (%s)", context.getString(R.string.Speed), unitString);
+            final LineDataSet dataset = createLineDataSet(context, convertPoints(speedDataPoints, units, quantity), label, ContextCompat.getColor(context, R.color.chart_line_speed));
             return new WorkoutChart(
                     "speed",
                     context.getString(R.string.Speed),
                     ActivitySummaryEntries.GROUP_SPEED,
                     new LineData(dataset),
-                    new SpeedYLabelFormatter(UNIT_METERS_PER_SECOND),
-                    getUnitString(context, UNIT_KMPH)
+                    new DecimalValueFormatter(units.decimals(quantity)),
+                    unitString
             );
         }
     }
@@ -405,49 +503,46 @@ public class DefaultWorkoutCharts {
 
     private static WorkoutChart createDepthChart(final Context context,
                                                      final List<Entry> depthDataPoints) {
-        final String label = String.format("%s(%s)", context.getString(R.string.diving_depth), getUnitString(context, UNIT_METERS));
-        final LineDataSet dataset = createLineDataSet(context, depthDataPoints, label, ContextCompat.getColor(context, R.color.chart_line_depth));
-        final ValueFormatter integerFormatter = new ValueFormatter() {
-            @Override
-            public String getFormattedValue(float value) {
-                return String.valueOf((int) value);
-            }
-        };
+        final WorkoutChartUnits units = chartUnits();
+        final WorkoutChartUnits.Quantity quantity = WorkoutChartUnits.Quantity.DEPTH;
+        final String unitString = getUnitString(context, units.token(quantity));
+        final String label = String.format("%s(%s)", context.getString(R.string.diving_depth), unitString);
+        final LineDataSet dataset = createLineDataSet(context, convertPoints(depthDataPoints, units, quantity), label, ContextCompat.getColor(context, R.color.chart_line_depth));
         return new WorkoutChart(
                 "diving_depth",
                 context.getString(R.string.diving_depth),
                 ActivitySummaryEntries.GROUP_DIVING,
                 new LineData(dataset),
-                integerFormatter,
-                getUnitString(context, UNIT_METERS)
+                new DecimalValueFormatter(units.decimals(quantity)),
+                unitString
         );
     }
 
     private static WorkoutChart createTemperatureChart(final Context context,
                                                        final List<Entry> temperatureDataPoints,
                                                        final Accumulator temperatureAccumulator) {
-        final String label = String.format("%s(%s)", context.getString(R.string.menuitem_temperature), getUnitString(context, UNIT_CELSIUS));
-        final LineDataSet dataset = createLineDataSet(context, temperatureDataPoints, label, ContextCompat.getColor(context, R.color.chart_line_heart_rate));
-        final ValueFormatter integerFormatter = new ValueFormatter() {
-            @Override
-            public String getFormattedValue(float value) {
-                return String.valueOf((int) value);
-            }
-        };
+        final WorkoutChartUnits units = chartUnits();
+        final WorkoutChartUnits.Quantity quantity = WorkoutChartUnits.Quantity.TEMPERATURE;
+        final String unitString = getUnitString(context, units.token(quantity));
+        final String label = String.format("%s(%s)", context.getString(R.string.menuitem_temperature), unitString);
+        final LineDataSet dataset = createLineDataSet(context, convertPoints(temperatureDataPoints, units, quantity), label, ContextCompat.getColor(context, R.color.chart_line_heart_rate));
+        // axis bounds mirror the plotted (already converted) values
+        final float axisMin = (float) units.convert(quantity, 0);
+        final float axisMax = (float) units.convert(quantity, Math.max(35, temperatureAccumulator.getMax() + 5));
         return new WorkoutChart(
                 "temperature",
                 context.getString(R.string.menuitem_temperature),
                 ActivitySummaryEntries.GROUP_TEMPERATURE,
                 new LineData(dataset),
-                integerFormatter,
-                getUnitString(context, UNIT_CELSIUS),
+                new DecimalValueFormatter(units.decimals(quantity)),
+                unitString,
                 lineChart -> {
                     YAxis yAxisLeft = lineChart.getAxisLeft();
-                    yAxisLeft.setAxisMinimum(0);
-                    yAxisLeft.setAxisMaximum((float) Math.max(35, temperatureAccumulator.getMax() + 5));
+                    yAxisLeft.setAxisMinimum(axisMin);
+                    yAxisLeft.setAxisMaximum(axisMax);
                     YAxis yAxisRight = lineChart.getAxisRight();
-                    yAxisRight.setAxisMinimum(0);
-                    yAxisRight.setAxisMaximum((float) Math.max(35, temperatureAccumulator.getMax() + 5));
+                    yAxisRight.setAxisMinimum(axisMin);
+                    yAxisRight.setAxisMaximum(axisMax);
                     return kotlin.Unit.INSTANCE;
                 }
         );
@@ -455,21 +550,18 @@ public class DefaultWorkoutCharts {
 
     private static WorkoutChart createDistanceChart(final Context context,
                                                     final List<Entry> distancePoints) {
-        final String label = String.format("%s(%s)", context.getString(R.string.distance), getUnitString(context, UNIT_METERS));
-        final LineDataSet dataset = createLineDataSet(context, distancePoints, label, ContextCompat.getColor(context, R.color.chart_line_distance));
-        final ValueFormatter valueFormatter = new ValueFormatter() {
-            @Override
-            public String getFormattedValue(float value) {
-                return String.valueOf((int) value);
-            }
-        };
+        final WorkoutChartUnits units = chartUnits();
+        final WorkoutChartUnits.Quantity quantity = WorkoutChartUnits.Quantity.DISTANCE;
+        final String unitString = getUnitString(context, units.token(quantity));
+        final String label = String.format("%s(%s)", context.getString(R.string.distance), unitString);
+        final LineDataSet dataset = createLineDataSet(context, convertPoints(distancePoints, units, quantity), label, ContextCompat.getColor(context, R.color.chart_line_distance));
         return new WorkoutChart(
                 "chart_distance",
                 context.getString(R.string.distance),
                 ActivitySummaryEntries.GROUP_DISTANCE,
                 new LineData(dataset),
-                valueFormatter,
-                getUnitString(context, UNIT_METERS)
+                new DecimalValueFormatter(units.decimals(quantity)),
+                unitString
         );
     }
 
@@ -515,21 +607,18 @@ public class DefaultWorkoutCharts {
 
     private static WorkoutChart createStepLengthChart(final Context context,
                                                   final List<Entry> stepLengthPoints) {
-        final String label = String.format("%s(%s)", context.getString(R.string.step_length), getUnitString(context, UNIT_MM));
-        final LineDataSet dataset = createLineDataSet(context, stepLengthPoints, label, ContextCompat.getColor(context, R.color.chart_line_step_length));
-        final ValueFormatter valueFormatter = new ValueFormatter() {
-            @Override
-            public String getFormattedValue(float value) {
-                return String.valueOf((int) value);
-            }
-        };
+        final WorkoutChartUnits units = chartUnits();
+        final WorkoutChartUnits.Quantity quantity = WorkoutChartUnits.Quantity.STEP_LENGTH;
+        final String unitString = getUnitString(context, units.token(quantity));
+        final String label = String.format("%s(%s)", context.getString(R.string.step_length), unitString);
+        final LineDataSet dataset = createLineDataSet(context, convertPoints(stepLengthPoints, units, quantity), label, ContextCompat.getColor(context, R.color.chart_line_step_length));
         return new WorkoutChart(
                 "chart_step_length",
                 context.getString(R.string.step_length),
                 ActivitySummaryEntries.GROUP_STEPS,
                 new LineData(dataset),
-                valueFormatter,
-                getUnitString(context, UNIT_MM)
+                new DecimalValueFormatter(units.decimals(quantity)),
+                unitString
         );
     }
 
@@ -571,6 +660,156 @@ public class DefaultWorkoutCharts {
                 valueFormatter,
                 getUnitString(context, UNIT_PERCENTAGE)
         );
+    }
+
+    private static WorkoutChart createVerticalOscillationChart(final Context context,
+                                                               final List<Entry> verticalOscillationPoints) {
+        final String label = String.format("%s(%s)", context.getString(R.string.vertical_oscillation), getUnitString(context, UNIT_MM));
+        final LineDataSet dataset = createLineDataSet(context, verticalOscillationPoints, label, ContextCompat.getColor(context, R.color.chart_line_stride));
+        final ValueFormatter valueFormatter = new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                return String.valueOf((int) value);
+            }
+        };
+        return new WorkoutChart(
+                "chart_vertical_oscillation",
+                context.getString(R.string.vertical_oscillation),
+                ActivitySummaryEntries.GROUP_RUNNING_FORM,
+                new LineData(dataset),
+                valueFormatter,
+                getUnitString(context, UNIT_MM)
+        );
+    }
+
+    private static WorkoutChart createStanceTimePercentChart(final Context context,
+                                                             final List<Entry> stanceTimePercentPoints) {
+        final String label = String.format("%s(%s)", context.getString(R.string.stance_time_percent), getUnitString(context, UNIT_PERCENTAGE));
+        final LineDataSet dataset = createLineDataSet(context, stanceTimePercentPoints, label, ContextCompat.getColor(context, R.color.chart_line_swolf));
+        final ValueFormatter valueFormatter = new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                return String.format(java.util.Locale.ROOT, "%.1f", value);
+            }
+        };
+        return new WorkoutChart(
+                "chart_stance_time_percent",
+                context.getString(R.string.stance_time_percent),
+                ActivitySummaryEntries.GROUP_RUNNING_FORM,
+                new LineData(dataset),
+                valueFormatter,
+                getUnitString(context, UNIT_PERCENTAGE)
+        );
+    }
+
+    private static WorkoutChart createStanceTimeChart(final Context context,
+                                                      final List<Entry> stanceTimePoints) {
+        final String label = String.format("%s(%s)", context.getString(R.string.ground_contact_time), getUnitString(context, UNIT_MILLISECONDS));
+        final LineDataSet dataset = createLineDataSet(context, stanceTimePoints, label, ContextCompat.getColor(context, R.color.chart_line_step_length));
+        final ValueFormatter valueFormatter = new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                return String.valueOf((int) value);
+            }
+        };
+        return new WorkoutChart(
+                "chart_stance_time",
+                context.getString(R.string.ground_contact_time),
+                ActivitySummaryEntries.GROUP_RUNNING_FORM,
+                new LineData(dataset),
+                valueFormatter,
+                getUnitString(context, UNIT_MILLISECONDS)
+        );
+    }
+
+    private static WorkoutChart createVerticalRatioChart(final Context context,
+                                                         final List<Entry> verticalRatioPoints) {
+        final String label = String.format("%s(%s)", context.getString(R.string.vertical_ratio), getUnitString(context, UNIT_PERCENTAGE));
+        final LineDataSet dataset = createLineDataSet(context, verticalRatioPoints, label, ContextCompat.getColor(context, R.color.chart_line_stamina));
+        final ValueFormatter valueFormatter = new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                return String.format(java.util.Locale.ROOT, "%.1f", value);
+            }
+        };
+        return new WorkoutChart(
+                "chart_vertical_ratio",
+                context.getString(R.string.vertical_ratio),
+                ActivitySummaryEntries.GROUP_RUNNING_FORM,
+                new LineData(dataset),
+                valueFormatter,
+                getUnitString(context, UNIT_PERCENTAGE)
+        );
+    }
+
+    private static WorkoutChart createStanceTimeBalanceChart(final Context context,
+                                                             final List<Entry> stanceTimeBalancePoints) {
+        final String label = String.format("%s(%s)", context.getString(R.string.ground_contact_time_balance), getUnitString(context, UNIT_PERCENTAGE));
+        final LineDataSet dataset = createLineDataSet(context, stanceTimeBalancePoints, label, ContextCompat.getColor(context, R.color.chart_line_body_energy));
+        final ValueFormatter valueFormatter = new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                return String.format(java.util.Locale.ROOT, "%.1f", value);
+            }
+        };
+        return new WorkoutChart(
+                "chart_stance_time_balance",
+                context.getString(R.string.ground_contact_time_balance),
+                ActivitySummaryEntries.GROUP_RUNNING_FORM,
+                new LineData(dataset),
+                valueFormatter,
+                getUnitString(context, UNIT_PERCENTAGE)
+        );
+    }
+
+    private static WorkoutChart createPerformanceConditionChart(final Context context,
+                                                                final List<Entry> performanceConditionPoints) {
+        final String label = context.getString(R.string.performance_condition);
+        final LineDataSet dataset = createLineDataSet(context, performanceConditionPoints, label, ContextCompat.getColor(context, R.color.chart_line_elevation));
+        final ValueFormatter valueFormatter = new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                return String.valueOf((int) value);
+            }
+        };
+        return new WorkoutChart(
+                "chart_performance_condition",
+                context.getString(R.string.performance_condition),
+                ActivitySummaryEntries.GROUP_PERFORMANCE_CONDITION,
+                new LineData(dataset),
+                valueFormatter,
+                ""
+        );
+    }
+
+    private static WorkoutChartUnits chartUnits() {
+        return new WorkoutChartUnits(
+                GBApplication.getPrefs().getDistanceUnit(),
+                GBApplication.getPrefs().getTemperatureUnit()
+        );
+    }
+
+    private static WorkoutChartUnits chartUnits(final ActivityKind activityKind) {
+        return new WorkoutChartUnits(
+                GBApplication.getPrefs().getDistanceUnit(),
+                GBApplication.getPrefs().getTemperatureUnit(),
+                activityKind,
+                GBApplication.getPrefs().getBoolean("units_nautical", true)
+        );
+    }
+
+    /**
+     * Converts the plotted metric values to the display unit so the chart library picks round ticks
+     * in that unit's domain. The label formatter then only has to render decimals, never convert.
+     */
+    private static List<Entry> convertPoints(final List<Entry> points,
+                                             final WorkoutChartUnits units,
+                                             final WorkoutChartUnits.Quantity quantity) {
+        final List<Entry> converted = new ArrayList<>(points.size());
+        for (final Entry entry : points) {
+            converted.add(new Entry(entry.getX(), (float) units.convert(quantity, entry.getY())));
+        }
+        return converted;
     }
 
     public static String getUnitString(final Context context, final String unit) {

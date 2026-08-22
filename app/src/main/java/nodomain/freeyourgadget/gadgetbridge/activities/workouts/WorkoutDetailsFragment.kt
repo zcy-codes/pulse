@@ -20,6 +20,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Typeface
+import android.net.Uri
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.Gravity
@@ -72,6 +73,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.workouts.entries.Activity
 import nodomain.freeyourgadget.gadgetbridge.databinding.FragmentWorkoutDetailsBinding
 import nodomain.freeyourgadget.gadgetbridge.entities.BaseActivitySummary
 import nodomain.freeyourgadget.gadgetbridge.entities.Device
+import nodomain.freeyourgadget.gadgetbridge.export.FitExporter
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryData
@@ -114,7 +116,7 @@ class WorkoutDetailsFragment : Fragment(), MenuProvider {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        workoutEditor = WorkoutEditor(requireContext())
+        workoutEditor = WorkoutEditor(requireContext(), this)
         arguments?.let {
             workoutId = it.getLong(ARG_WORKOUT_ID, -1)
         }
@@ -175,6 +177,7 @@ class WorkoutDetailsFragment : Fragment(), MenuProvider {
                         dbHandler.daoSession.baseActivitySummaryDao.load(workoutId)
                     }
                     gbDevice = getGBDevice(summary.device)
+                    workoutEditor.gbDevice = gbDevice
                     val parsedWorkout = try {
                         gbDevice.deviceCoordinator.getActivitySummaryParser(gbDevice, requireContext())
                             .parseWorkout(summary, true)
@@ -256,6 +259,14 @@ class WorkoutDetailsFragment : Fragment(), MenuProvider {
         )
 
         view?.let {
+            // Header photo
+            if (summary.headerPhoto == null) {
+                binding.headerphoto.setImageDrawable(null)
+            } else {
+                binding.headerphoto.setImageURI(Uri.fromFile(File(summary.headerPhoto)))
+            }
+
+            // Activity icon
             binding.itemImage.setImageResource(
                 ActivityKind.fromCode(summary.activityKind).icon
             )
@@ -350,6 +361,8 @@ class WorkoutDetailsFragment : Fragment(), MenuProvider {
     private fun updateFragments(workout: Workout) {
         // If there's a device-specific HR chart, prefer it over the default one
         if (workout.charts.any { chart -> chart.group == ActivitySummaryEntries.GROUP_HEART_RATE }) {
+            binding.heartRateChartWrapper.visibility = View.GONE
+        } else if (!gbDevice.deviceCoordinator.supportsHeartRateMeasurement(gbDevice)) {
             binding.heartRateChartWrapper.visibility = View.GONE
         } else {
             chartFragment?.setDateAndGetData(
@@ -581,12 +594,43 @@ class WorkoutDetailsFragment : Fragment(), MenuProvider {
                 true
             }
 
+            R.id.activity_action_share_fit -> {
+                exportFit(workout)
+                true
+            }
+
             R.id.activity_summary_detail_action_edit_name -> {
                 currentWorkout?.let {
                     workoutEditor.editWorkoutName(it, object : WorkoutEditor.Callback {
                         override fun onWorkoutUpdated() {
                             notifyWorkoutChanged()
                             updateWorkoutHeader(workout.summary)
+                        }
+                    })
+                }
+                true
+            }
+
+            R.id.activity_summary_detail_action_add_photo -> {
+                currentWorkout?.let {
+                    workoutEditor.setHeaderPhoto(it, object : WorkoutEditor.Callback {
+                        override fun onWorkoutUpdated() {
+                            notifyWorkoutChanged()
+                            // Reload only the workout header
+                            updateWorkoutHeader(it.summary)
+                        }
+                    })
+                }
+                true
+            }
+
+            R.id.activity_summary_detail_action_remove_photo -> {
+                currentWorkout?.let {
+                    workoutEditor.removeHeaderPhoto(it, object : WorkoutEditor.Callback {
+                        override fun onWorkoutUpdated() {
+                            notifyWorkoutChanged()
+                            // Reload only the workout header
+                            updateWorkoutHeader(it.summary)
                         }
                     })
                 }
@@ -643,10 +687,17 @@ class WorkoutDetailsFragment : Fragment(), MenuProvider {
             devToolsMenu?.isVisible = devToolsSubMenu != null && devToolsSubMenu.hasVisibleItems()
         }
 
+        val overflowMenu2 = menu.findItem(R.id.activity_detail_overflowMenu2)?.subMenu
+        overflowMenu2?.findItem(R.id.activity_summary_detail_action_add_photo)?.isVisible = workout.summary.headerPhoto == null
+        overflowMenu2?.findItem(R.id.activity_summary_detail_action_remove_photo)?.isVisible = workout.summary.headerPhoto != null
+
+        // Endurain accepts FIT (built from the summary alone if needed), so it is offered
+        // for any workout. Wanderer only supports GPX uploads, so it requires a GPS track.
         val endurainVm: EndurainSetupViewModel by viewModels()
-        val server = GBApplication.getPrefs().preferences.getString("endurain_server", null)
-        overflowMenu?.findItem(R.id.activity_action_upload_to_endurain)?.isVisible = hasGpx && server != null && endurainVm.endurainTokenManager.isLoggedIn()
-        overflowMenu?.findItem(R.id.activity_action_upload_to_wanderer)?.isVisible = hasGpx && server != null && WandererTokenManager(requireContext()).isLoggedIn()
+        val endurainServer = GBApplication.getPrefs().preferences.getString("endurain_server", null)
+        val wandererServer = GBApplication.getPrefs().preferences.getString("wanderer_server", null)
+        overflowMenu?.findItem(R.id.activity_action_upload_to_endurain)?.isVisible = endurainServer != null && endurainVm.endurainTokenManager.isLoggedIn()
+        overflowMenu?.findItem(R.id.activity_action_upload_to_wanderer)?.isVisible = hasGpx && wandererServer != null && WandererTokenManager(requireContext()).isLoggedIn()
     }
 
     private fun takeSharedScreenshot() {
@@ -755,70 +806,76 @@ class WorkoutDetailsFragment : Fragment(), MenuProvider {
 
     private fun uploadToEndurain() {
         val workout = currentWorkout ?: return
-        val workoutName = currentWorkout!!.summary.name
-        val activityKind = ActivityKind.fromCode(currentWorkout!!.summary.activityKind)
-        val activityTrackProvider = gbDevice.deviceCoordinator.getActivityTrackProvider(gbDevice, requireContext())
+        val activityKind = ActivityKind.fromCode(workout.summary.activityKind)
+        val workoutName = workout.summary.name ?: activityKind.getLabel(requireContext())
 
-        val activityFile = if (workout.summary.rawDetailsPath?.endsWith(".fit") == true) {
-            FileUtils.tryFixPath(workout.summary.rawDetailsPath)
-        } else {
-            ActivitySummaryUtils.getShareableGpxFile(activityTrackProvider, workout.summary)
-        }
+        lifecycleScope.launch {
+            val activityFile = try {
+                buildFitFile(workout)
+            } catch (e: Exception) {
+                LOG.error("Failed to build FIT for Endurain upload", e)
+                GB.toast(
+                    getString(R.string.endurain_unable_to_upload_gpx_file_toast, e.localizedMessage),
+                    Toast.LENGTH_LONG,
+                    GB.ERROR,
+                    e
+                )
+                return@launch
+            }
 
-        if (activityFile == null) {
-            GB.toast(getString(R.string.no_activity_track_in_activity_toast), Toast.LENGTH_LONG, GB.INFO)
-            return
-        }
-
-        try {
-            val endurainVm: EndurainSetupViewModel by viewModels()
-            val serverUrl = GBApplication.getPrefs().preferences.getString("endurain_server", null)
-            val apiClient = EndurainApiClient(serverUrl!!, endurainVm.endurainTokenManager)
-            endurainVm.endurainTokenManager.performTokenRefresh(serverUrl) {
-                LOG.info("Uploading workout '{}' (type {}) to Endurain", workoutName, activityKind)
-                apiClient.uploadActivity(activityFile) { newId ->
-                    if (newId != null) {
-                        // Update activity type on the server
-                        apiClient.editActivity(newId, activityKind, workoutName)
-                    }
-                    activity?.runOnUiThread {
-                        if (newId != null)
-                            GB.toast(
-                                getString(R.string.endurain_successfully_uploaded_toast),
-                                Toast.LENGTH_SHORT,
-                                GB.INFO
-                            )
-                        else
-                            GB.toast(
-                                getString(R.string.endurain_error_while_uploading_toast),
-                                Toast.LENGTH_SHORT,
-                                GB.INFO
-                            )
+            try {
+                val endurainVm: EndurainSetupViewModel by viewModels()
+                val serverUrl = GBApplication.getPrefs().preferences.getString("endurain_server", null)
+                val apiClient = EndurainApiClient(serverUrl!!, endurainVm.endurainTokenManager)
+                endurainVm.endurainTokenManager.performTokenRefresh(serverUrl) {
+                    LOG.info("Uploading workout '{}' (type {}) to Endurain", workoutName, activityKind)
+                    GB.toast(
+                        getString(R.string.endurain_uploading_started),
+                        Toast.LENGTH_SHORT,
+                        GB.INFO
+                    )
+                    apiClient.uploadActivity(activityFile) { newId ->
+                        if (newId != null) {
+                            // Update activity type on the server
+                            apiClient.editActivity(newId, activityKind, workoutName)
+                            // Upload workout photo to the new activity
+                            if (workout.summary.headerPhoto != null) {
+                                apiClient.uploadActivityPhoto(newId, File(workout.summary.headerPhoto))
+                            }
+                        }
+                        activity?.runOnUiThread {
+                            if (newId != null)
+                                GB.toast(
+                                    getString(R.string.endurain_successfully_uploaded_toast),
+                                    Toast.LENGTH_SHORT,
+                                    GB.INFO
+                                )
+                            else
+                                GB.toast(
+                                    getString(R.string.endurain_error_while_uploading_toast),
+                                    Toast.LENGTH_SHORT,
+                                    GB.INFO
+                                )
+                        }
                     }
                 }
+            } catch (e: Exception) {
+                GB.toast(
+                    getString(R.string.endurain_unable_to_upload_gpx_file_toast, e.localizedMessage),
+                    Toast.LENGTH_LONG,
+                    GB.ERROR,
+                    e
+                )
             }
-        } catch (e: Exception) {
-            GB.toast(
-                getString(R.string.endurain_unable_to_upload_gpx_file_toast, e.localizedMessage),
-                Toast.LENGTH_LONG,
-                GB.ERROR,
-                e
-            )
         }
     }
 
     private fun uploadToWanderer() {
         val workout = currentWorkout ?: return
-        val workoutName = currentWorkout!!.summary.name
-        val activityKind = ActivityKind.fromCode(currentWorkout!!.summary.activityKind)
         val activityTrackProvider = gbDevice.deviceCoordinator.getActivityTrackProvider(gbDevice, requireContext())
 
-        val activityFile = if (workout.summary.rawDetailsPath?.endsWith(".fit") == true) {
-            FileUtils.tryFixPath(workout.summary.rawDetailsPath)
-        } else {
-            ActivitySummaryUtils.getShareableGpxFile(activityTrackProvider, workout.summary)
-        }
-
+        // Wanderer only supports GPX uploads, so always send GPX (never a FIT file).
+        val activityFile = ActivitySummaryUtils.getShareableGpxFile(activityTrackProvider, workout.summary)
         if (activityFile == null) {
             GB.toast(getString(R.string.no_activity_track_in_activity_toast), Toast.LENGTH_LONG, GB.INFO)
             return
@@ -927,6 +984,58 @@ class WorkoutDetailsFragment : Fragment(), MenuProvider {
                 GB.ERROR,
                 e
             )
+        }
+    }
+
+    /**
+     * Builds a FIT file for the given workout in the cache directory.
+     *
+     * FIT-native devices (Garmin, iGPSPORT) keep the original .fit at rawDetailsPath —
+     * it is copied verbatim. For any other device the FIT is synthesized from the
+     * summary (and the activity track, if one is available).
+     */
+    private suspend fun buildFitFile(workout: Workout): File = withContext(Dispatchers.IO) {
+        val kindLabel = ActivityKind.fromCode(workout.summary.activityKind)
+            .getLabel(requireContext()).lowercase()
+        val fileName = FileUtils.makeValidFileName(
+            "Workout-${kindLabel}-${DateTimeUtils.formatIso8601(workout.summary.startTime)}.fit"
+        )
+        val cacheSubDir = File(requireContext().cacheDir, "raw")
+        cacheSubDir.mkdirs()
+        val outFile = File(cacheSubDir, fileName)
+
+        val rawFit = FitExporter.resolveRawFitFile(workout.summary)
+        if (rawFit != null) {
+            rawFit.copyTo(outFile, overwrite = true)
+        } else {
+            val activityTrackProvider = gbDevice.deviceCoordinator
+                .getActivityTrackProvider(gbDevice, requireContext())
+            val track = try {
+                activityTrackProvider?.getActivityTrack(workout.summary)
+            } catch (e: Exception) {
+                LOG.warn("Failed to load activity track for FIT export", e)
+                null
+            }
+            FitExporter().performExport(track, workout.summary, workout.data, outFile)
+        }
+        outFile
+    }
+
+    private fun exportFit(workout: Workout) {
+        lifecycleScope.launch {
+            try {
+                val targetFile = buildFitFile(workout)
+                AndroidUtils.shareFile(requireContext(), targetFile, "application/octet-stream")
+            } catch (e: Exception) {
+                LOG.error("Failed to export FIT file", e)
+                GB.toast(
+                    requireContext(),
+                    getString(R.string.activity_detail_export_fit_failed),
+                    Toast.LENGTH_LONG,
+                    GB.ERROR,
+                    e
+                )
+            }
         }
     }
 

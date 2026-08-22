@@ -80,8 +80,14 @@ public class Logging {
             } else {
                 stopFileLogger();
             }
-            LOG.info("Gadgetbridge version: {}-{} {} {}", BuildConfig.VERSION_NAME,
-                    BuildConfig.GIT_HASH_SHORT, BuildConfig.FLAVOR, BuildConfig.BUILD_TYPE);
+            LOG.info(
+                    "Gadgetbridge version: {}-{}{} {} {}",
+                    BuildConfig.VERSION_NAME,
+                    BuildConfig.GIT_HASH_SHORT,
+                    BuildConfig.GIT_DIRTY_STATUS,
+                    BuildConfig.FLAVOR,
+                    BuildConfig.BUILD_TYPE
+            );
 
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.BAKLAVA) {
                 LOG.info(
@@ -256,9 +262,9 @@ public class Logging {
         rollingPolicy.setContext(lc);
         rollingPolicy.setFileNamePattern(logDirectory + "/gadgetbridge-%d{yyyy-MM-dd}.%i.log.zip");
         rollingPolicy.setParent(fileAppender);
-        rollingPolicy.setMaxFileSize(FileSize.valueOf("10MB"));
+        rollingPolicy.setMaxFileSize(FileSize.valueOf(BuildConfig.DEBUG ? "100MB" : "10MB"));
         rollingPolicy.setMaxHistory(10);
-        rollingPolicy.setTotalSizeCap(FileSize.valueOf("100MB"));
+        rollingPolicy.setTotalSizeCap(FileSize.valueOf(BuildConfig.DEBUG ? "200MB" : "100MB"));
         rollingPolicy.start();
 
         fileAppender.setContext(lc);

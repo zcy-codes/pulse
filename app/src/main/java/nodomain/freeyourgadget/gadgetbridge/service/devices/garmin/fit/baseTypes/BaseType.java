@@ -1,5 +1,8 @@
 package nodomain.freeyourgadget.gadgetbridge.service.devices.garmin.fit.baseTypes;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.nio.ByteBuffer;
 
 //see https://github.com/dtcooper/python-fitparse/blob/master/fitparse/records.py
@@ -17,7 +20,7 @@ public enum BaseType {
     UINT8Z(0x0A, new BaseTypeByte(true, 0x00)),
     UINT16Z(0x8B, new BaseTypeShort(true, 0)),
     UINT32Z(0x8C, new BaseTypeInt(true, 0)),
-    BASE_TYPE_BYTE(0x0D, new BaseTypeByte(true, 0xFF)),
+    BYTE(0x0D, new BaseTypeByte(true, 0xFF)),
     SINT64(0x8E, new BaseTypeLong(false, 0x7FFFFFFFFFFFFFFFL)),
     UINT64(0x8F, new BaseTypeLong(true, 0xFFFFFFFFFFFFFFFFL)),
     UINT64Z(0x90, new BaseTypeLong(true, 0)),
@@ -31,13 +34,21 @@ public enum BaseType {
         this.baseTypeInterface = byteBaseType;
     }
 
+    private static final Logger LOG = LoggerFactory.getLogger(BaseType.class);
+
     public static BaseType fromIdentifier(int identifier) {
         for (final BaseType baseType : BaseType.values()) {
             if (baseType.getIdentifier() == identifier) {
                 return baseType;
             }
         }
-        throw new IllegalArgumentException("Unknown type " + identifier);
+        // Unknown / future / developer-extended base type. Walk past as opaque bytes
+        // so the rest of the file still parses — the field's value is lost but the
+        // file structure is preserved. The caller's FieldDefinition still carries the
+        // declared byte size, so the codec can advance correctly.
+        LOG.warn("Unknown FIT base type 0x{} — falling back to opaque-byte handling",
+                Integer.toHexString(identifier & 0xFF));
+        return BYTE;
     }
 
     public int getSize() {
@@ -65,7 +76,7 @@ public enum BaseType {
             case UINT16:
             case UINT8Z:
             case UINT16Z:
-            case BASE_TYPE_BYTE:
+            case BYTE:
                 if (scale != 1) {
                     return ((Number) raw).floatValue();
                 } else {

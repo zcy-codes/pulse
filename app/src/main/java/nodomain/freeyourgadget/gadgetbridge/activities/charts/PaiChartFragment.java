@@ -213,7 +213,7 @@ public class PaiChartFragment extends AbstractChartFragment<PaiChartFragment.Pai
         day.setTime(chartsHost.getEndDate());
         //NB: we could have omitted the day, but this way we can move things to the past easily
         final DayData dayData = refreshDayData(db, day, device);
-        final WeekChartsData<BarData> weekBeforeData = refreshWeekBeforeData(db, mWeekChart, day, device);
+        final WeekChartsData<BarData> weekBeforeData = refreshWeekBeforeData(db, day, device);
 
         return new PaiChartsData(dayData, weekBeforeData);
     }
@@ -249,6 +249,8 @@ public class PaiChartFragment extends AbstractChartFragment<PaiChartFragment.Pai
         mWeekChart.setData(null); // workaround for https://github.com/PhilJay/MPAndroidChart/issues/2317
         mWeekChart.setData(pcd.getWeekBeforeData().getData());
         mWeekChart.getXAxis().setValueFormatter(pcd.getWeekBeforeData().getXValueFormatter());
+        mWeekChart.getAxisLeft().setAxisMaximum(
+                Math.max(pcd.getWeekBeforeData().getMaxPai(), getPaiTarget()) + 20);
 
         mDateView.setText(DateTimeUtils.formatDate(pcd.getDayData().day.getTime()));
         mLineToday.setText(requireContext().getString(R.string.pai_plus_num, pcd.getDayData().today));
@@ -288,7 +290,6 @@ public class PaiChartFragment extends AbstractChartFragment<PaiChartFragment.Pai
     }
 
     protected WeekChartsData<BarData> refreshWeekBeforeData(final DBHandler db,
-                                                            final BarChart barChart,
                                                             Calendar day,
                                                             final GBDevice device) {
         day = (Calendar) day.clone(); // do not modify the caller's argument
@@ -296,7 +297,6 @@ public class PaiChartFragment extends AbstractChartFragment<PaiChartFragment.Pai
 
         List<BarEntry> entries = new ArrayList<>();
         final ArrayList<String> labels = new ArrayList<>();
-
         int maxPai = -1;
 
         for (int counter = 0; counter < TOTAL_DAYS; counter++) {
@@ -306,10 +306,7 @@ public class PaiChartFragment extends AbstractChartFragment<PaiChartFragment.Pai
                 final PaiSample sample = sampleOpt.get();
                 final int paiToday = Math.round(sample.getPaiToday());
                 final int paiTotal = Math.round(sample.getPaiTotal());
-
-                if (paiTotal > maxPai) {
-                    maxPai = paiTotal;
-                }
+                maxPai = Math.max(maxPai, paiTotal);
 
                 final float[] paiBar = new float[]{
                         paiTotal - paiToday,
@@ -332,9 +329,7 @@ public class PaiChartFragment extends AbstractChartFragment<PaiChartFragment.Pai
         barData.setValueTextColor(TEXT_COLOR); //prevent tearing other graph elements with the black text. Another approach would be to hide the values completely with data.setDrawValues(false);
         barData.setValueTextSize(10f);
 
-        barChart.getAxisLeft().setAxisMaximum(Math.max(maxPai, getPaiTarget()) + 20);
-
-        return new WeekChartsData(barData, new PreformattedXIndexLabelFormatter(labels));
+        return new WeekChartsData(barData, new PreformattedXIndexLabelFormatter(labels), maxPai);
     }
 
     protected DayData refreshDayData(final DBHandler db,
@@ -464,9 +459,17 @@ public class PaiChartFragment extends AbstractChartFragment<PaiChartFragment.Pai
     }
 
     protected static class WeekChartsData<T extends ChartData<?>> extends DefaultChartsData<T> {
+        private final int maxPai;
+
         public WeekChartsData(final T data,
-                              final PreformattedXIndexLabelFormatter xIndexLabelFormatter) {
+                              final PreformattedXIndexLabelFormatter xIndexLabelFormatter,
+                              final int maxPai) {
             super(data, xIndexLabelFormatter);
+            this.maxPai = maxPai;
+        }
+
+        public int getMaxPai() {
+            return maxPai;
         }
     }
 

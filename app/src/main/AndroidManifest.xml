@@ -95,6 +95,11 @@
     <uses-permission android:name="lineageos.permission.READ_WEATHER" />
     <uses-permission android:name="org.omnirom.omnijaws.READ_WEATHER" />
 
+    <!-- Used for CoMaps navigation data -->
+    <uses-permission android:name="app.comaps.permission.READ_NAVIGATION_DATA" />
+    <uses-permission android:name="app.comaps.fdroid.permission.READ_NAVIGATION_DATA" />
+    <uses-permission android:name="app.comaps.google.permission.READ_NAVIGATION_DATA" />
+
     <!-- Used for starting activities from the background with intents -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
@@ -166,24 +171,6 @@
         android:requestLegacyExternalStorage="true"
         android:theme="@style/GadgetbridgeThemeDark"
         tools:replace="android:label">
-        <receiver
-            android:name=".externalevents.sleepasandroid.SleepAsAndroidReceiver"
-            android:enabled="true"
-            android:exported="true" >
-            <intent-filter>
-                <action android:name="com.urbandroid.sleep.watch.START_TRACKING" />
-                <action android:name="com.urbandroid.sleep.watch.STOP_TRACKING" />
-                <action android:name="com.urbandroid.sleep.watch.SET_PAUSE" />
-                <action android:name="com.urbandroid.sleep.watch.SET_SUSPENDED" />
-                <action android:name="com.urbandroid.sleep.watch.SET_BATCH_SIZE" />
-                <action android:name="com.urbandroid.sleep.watch.START_ALARM" />
-                <action android:name="com.urbandroid.sleep.watch.STOP_ALARM" />
-                <action android:name="com.urbandroid.sleep.watch.UPDATE_ALARM" />
-                <action android:name="com.urbandroid.sleep.watch.SHOW_NOTIFICATION" />
-                <action android:name="com.urbandroid.sleep.watch.HINT" />
-                <action android:name="com.urbandroid.sleep.watch.CHECK_CONNECTED" />
-            </intent-filter>
-        </receiver>
         <activity
             android:name=".activities.ControlCenterv2"
             android:label="@string/title_activity_controlcenter"
@@ -251,6 +238,10 @@
             android:label="@string/pref_header_auto_export_gpx"
             android:parentActivityName=".activities.SettingsActivity" />
         <activity
+            android:name=".activities.automations.AutoExportFitSettingsActivity"
+            android:label="@string/pref_header_auto_export_fit"
+            android:parentActivityName=".activities.SettingsActivity" />
+        <activity
             android:name=".activities.maps.MapsTrackActivity"
             android:label="@string/maps"
             android:parentActivityName=".activities.SettingsActivity" />
@@ -314,6 +305,10 @@
         <activity
             android:name=".devices.garmin.GarminRealtimeSettingsActivity"
             android:label="@string/loading"
+            android:parentActivityName=".activities.devicesettings.DeviceSettingsActivity" />
+        <activity
+            android:name=".devices.garmin.GarminAuthExpiredActivity"
+            android:label="@string/authentication_expired"
             android:parentActivityName=".activities.devicesettings.DeviceSettingsActivity" />
         <activity
             android:name=".devices.huawei.ui.HuaweiStressCalibrationActivity"
@@ -822,6 +817,12 @@
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|layoutDirection|uiMode"
             android:parentActivityName=".activities.ControlCenterv2" />
         <activity
+            android:name=".activities.aawireless.AAWirelessPairedPhonesActivity"
+            android:label="@string/paired_phones"
+            android:launchMode="singleTop"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|layoutDirection|uiMode"
+            android:parentActivityName=".activities.devicesettings.DeviceSettingsActivity" />
+        <activity
             android:name=".devices.miband.MiBandPairingActivity"
             android:label="@string/title_activity_mi_band_pairing" />
         <activity
@@ -866,6 +867,14 @@
         <activity
             android:name=".activities.widgets.WidgetScreensListActivity"
             android:label="@string/menuitem_widgets"
+            android:parentActivityName=".activities.ControlCenterv2" />
+        <activity
+            android:name=".activities.xiaomi.XiaomiVibrationPatternsActivity"
+            android:label="@string/pref_xiaomi_vibration_patterns_title"
+            android:parentActivityName=".activities.ControlCenterv2" />
+        <activity
+            android:name=".activities.casio.CasioIntervalTimerActivity"
+            android:label="@string/pref_casio_interval_timer_title"
             android:parentActivityName=".activities.ControlCenterv2" />
         <activity
             android:name=".activities.ConfigureWorldClocks"
@@ -915,7 +924,8 @@
             android:windowSoftInputMode="stateHidden|adjustPan" />
         <activity
             android:name=".activities.FindPhoneActivity"
-            android:label="Find Phone" />
+            android:label="@string/prefs_find_phone"
+            android:launchMode="singleTask" />
 
         <provider
             android:name=".contentprovider.PebbleContentProvider"
@@ -1207,6 +1217,142 @@
                 <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
             </intent-filter>
         </activity-alias>
+
+        <!-- Quick Settings preset tiles (API 24+). Each tile is independently assignable
+             to a device setting via QuickSettingsTilesActivity. -->
+        <service
+            android:name=".activities.quicksettings.DeviceTileService0"
+            android:exported="true"
+            android:icon="@drawable/ic_devices_other"
+            android:label="@string/qs_tile_label_1"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            tools:targetApi="24">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".activities.quicksettings.DeviceTileService1"
+            android:exported="true"
+            android:icon="@drawable/ic_devices_other"
+            android:label="@string/qs_tile_label_2"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            tools:targetApi="24">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".activities.quicksettings.DeviceTileService2"
+            android:exported="true"
+            android:icon="@drawable/ic_devices_other"
+            android:label="@string/qs_tile_label_3"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            tools:targetApi="24">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".activities.quicksettings.DeviceTileService3"
+            android:exported="true"
+            android:icon="@drawable/ic_devices_other"
+            android:label="@string/qs_tile_label_4"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            tools:targetApi="24">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".activities.quicksettings.DeviceTileService4"
+            android:exported="true"
+            android:icon="@drawable/ic_devices_other"
+            android:label="@string/qs_tile_label_5"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            tools:targetApi="24">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".activities.quicksettings.DeviceTileService5"
+            android:exported="true"
+            android:icon="@drawable/ic_devices_other"
+            android:label="@string/qs_tile_label_6"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            tools:targetApi="24">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".activities.quicksettings.DeviceTileService6"
+            android:exported="true"
+            android:icon="@drawable/ic_devices_other"
+            android:label="@string/qs_tile_label_7"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            tools:targetApi="24">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".activities.quicksettings.DeviceTileService7"
+            android:exported="true"
+            android:icon="@drawable/ic_devices_other"
+            android:label="@string/qs_tile_label_8"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            tools:targetApi="24">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".activities.quicksettings.DeviceTileService8"
+            android:exported="true"
+            android:icon="@drawable/ic_devices_other"
+            android:label="@string/qs_tile_label_9"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            tools:targetApi="24">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".activities.quicksettings.DeviceTileService9"
+            android:exported="true"
+            android:icon="@drawable/ic_devices_other"
+            android:label="@string/qs_tile_label_10"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            tools:targetApi="24">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <!-- Configuration activity for the preset Quick Settings tiles. -->
+        <activity
+            android:name=".activities.quicksettings.QuickSettingsTilesActivity"
+            android:exported="false"
+            android:label="@string/qs_tile_activity_title"
+            android:theme="@style/Theme.AppCompat.Light.Dialog"
+            tools:targetApi="24" />
+
+        <!-- Settings screen for Quick Settings tiles and Device Controls. -->
+        <activity
+            android:name=".activities.quicksettings.QuickSettingsPreferencesActivity"
+            android:exported="true"
+            android:label="@string/pref_header_quick_settings"
+            android:parentActivityName=".activities.SettingsActivity"
+            tools:targetApi="24">
+            <!-- Handle long-press on any of the QS tiles -->
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
     </application>
 
     <queries>
